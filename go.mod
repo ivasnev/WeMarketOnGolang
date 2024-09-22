@@ -1,1 +1,1 @@
-module MyFirstAwesomeProject
+module WeMarketOnGolang

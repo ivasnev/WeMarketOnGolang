@@ -5,7 +5,7 @@
 ### Практическая работа 1
 Тема работы: интернет-магазин
 
-![wemarket_db_diagram.png](wemarket_db_diagram.png)
+![wemarket_db_diagram.png](docs/img/wemarket_db_diagram.png)
 
 ### Users (Пользователи)
 Содержит: ID пользователя; Имя; Электронная почта; Пароль (в хэшированном виде); Телефон; Адрес доставки; Роль;
@@ -74,3 +74,10 @@
 
 ### System Logs (Логи системы)
 Содержит: ID лога; Дата и время; Уровень; Сообщение; Пользователь (если применимо).
+
+### Практическая работа 1
+Диаграмма вариантов использования
+### UseCase для пользователя
+![use_case_user.png](docs/img/use_case_user.png)
+### UseCase для администратора
+![use_case_admin.png](docs/img/use_case_admin.png)
