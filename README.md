@@ -5,7 +5,7 @@
 ### Практическая работа 1
 Тема работы: интернет-магазин
 
-![wemarket_db_diagram.png](docs/img/wemarket_db_diagram.png)
+![wemarket_db_diagram.png](internal/docs/img/wemarket_db_diagram.png)
 
 #### Users (Пользователи)
 Содержит: ID пользователя; Имя; Электронная почта; Пароль (в хэшированном виде); Телефон; Адрес доставки; Роль;
@@ -78,6 +78,6 @@
 ### Практическая работа 2
 Диаграмма вариантов использованияS
 #### UseCase для пользователя
-![use_case_user.png](docs/img/use_case_user.png)
+![use_case_user.png](internal/docs/img/use_case_user.png)
 #### UseCase для администратора
-![use_case_admin.png](docs/img/use_case_admin.png)
+![use_case_admin.png](internal/docs/img/use_case_admin.png)

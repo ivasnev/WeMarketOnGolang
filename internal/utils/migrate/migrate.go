@@ -1,7 +1,7 @@
 package main
 
 import (
-	"WeMarketOnGolang/models" // Импорт пакета моделей
+	"WeMarketOnGolang/internal/models"
 	"log"
 
 	"gorm.io/driver/postgres"

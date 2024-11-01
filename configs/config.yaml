@@ -1,0 +1,10 @@
+# configs/config.yaml
+server:
+  port: "8080"
+
+db:
+  user: "postgres"
+  password: "postgres"
+  name: "wemarket"
+  host: "localhost"
+  port: "5432"
