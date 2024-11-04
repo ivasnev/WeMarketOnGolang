@@ -9,3 +9,4 @@
   - [1. База Данных](internal/docs/Practice/pr_1.md)
   - [2. UseCase](internal/docs/Practice/pr_2.md)
   - [3. ClassDiagram](https://github.com/ivasnev/IndustrialProgramming)
+  - [8. Апи без бд](internal/docs/Practice/pr_8.md)
