@@ -3,29 +3,47 @@ package routes
 import (
 	"WeMarketOnGolang/internal/handlers"
 	"WeMarketOnGolang/internal/services"
+	"WeMarketOnGolang/internal/services/products"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
 func InitRoutes(router *gin.Engine, db *gorm.DB) {
-	productService := services.NewProductService(db)
+	productService := products.NewProductService(db)
+	productServiceV0 := products.NewInMemoryProductService()
+	productServiceV0.SeedProducts()
 	userService := services.NewUserService(db)
 	productHandler := handlers.NewProductHandler(productService)
+	productHandlerV0 := handlers.NewProductHandler(productServiceV0)
 	userHandler := handlers.NewUserHandler(userService)
 
-	api := router.Group("/v1")
+	apiV0 := router.Group("/v0")
 	{
 		// Группа маршрутов для продуктов
-		products := api.Group("/products")
+		products := apiV0.Group("/products")
+		{
+			products.GET("/:id", productHandlerV0.GetProduct)
+			products.GET("/", productHandlerV0.ListProducts)
+			products.POST("/", productHandlerV0.CreateProduct)
+			products.PUT("/:id", productHandlerV0.UpdateProduct)
+			products.DELETE("/:id", productHandlerV0.DeleteProduct)
+		}
+	}
+
+	apiV1 := router.Group("/v1")
+	{
+		// Группа маршрутов для продуктов
+		products := apiV1.Group("/products")
 		{
 			products.GET("/:id", productHandler.GetProduct)
-			//products.POST("/", productHandler.CreateProduct)
-			//products.PUT("/:id", productHandler.UpdateProduct)
-			//products.DELETE("/:id", productHandler.DeleteProduct)
+			products.GET("/", productHandler.ListProducts)
+			products.POST("/", productHandler.CreateProduct)
+			products.PUT("/:id", productHandler.UpdateProduct)
+			products.DELETE("/:id", productHandler.DeleteProduct)
 		}
 
 		// Группа маршрутов для пользователей
-		users := api.Group("/users")
+		users := apiV1.Group("/users")
 		{
 			users.GET("/:id", userHandler.GetUser)
 			//users.POST("/", userHandler.CreateUser)

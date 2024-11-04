@@ -1,20 +1,20 @@
 package handlers
 
 import (
+	"WeMarketOnGolang/internal/services/products"
 	"net/http"
 	"strconv"
 
 	"WeMarketOnGolang/internal/models"
-	"WeMarketOnGolang/internal/services"
 	"github.com/gin-gonic/gin"
 )
 
 type ProductHandler struct {
-	ProductService *services.ProductService
+	ProductService products.ProductServiceInterface
 }
 
 // NewProductHandler создает новый экземпляр ProductHandler
-func NewProductHandler(productService *services.ProductService) *ProductHandler {
+func NewProductHandler(productService products.ProductServiceInterface) *ProductHandler {
 	return &ProductHandler{ProductService: productService}
 }
 
@@ -40,7 +40,7 @@ func (h *ProductHandler) GetProduct(c *gin.Context) {
 		return
 	}
 
-	product, err := h.ProductService.GetProduct(c.Request.Context(), uint(id))
+	product, err := h.ProductService.GetProduct(c.Request.Context(), int32(id))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve product"})
 		return
@@ -54,10 +54,46 @@ func (h *ProductHandler) GetProduct(c *gin.Context) {
 
 // ListProducts возвращает список всех товаров
 func (h *ProductHandler) ListProducts(c *gin.Context) {
-	products, err := h.ProductService.ListProducts(c.Request.Context())
+	productList, err := h.ProductService.ListProducts(c.Request.Context())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list products"})
 		return
 	}
-	c.JSON(http.StatusOK, products)
+	c.JSON(http.StatusOK, productList)
+}
+
+// UpdateProduct обновляет существующий товар по ID
+func (h *ProductHandler) UpdateProduct(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID"})
+		return
+	}
+
+	var updatedData models.Product
+	if err := c.ShouldBindJSON(&updatedData); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		return
+	}
+
+	if err := h.ProductService.UpdateProduct(c.Request.Context(), int32(id), &updatedData); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update product"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Product updated successfully"})
+}
+
+// DeleteProduct удаляет товар по ID
+func (h *ProductHandler) DeleteProduct(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID"})
+		return
+	}
+
+	if err := h.ProductService.DeleteProduct(c.Request.Context(), int32(id)); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete product"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Product deleted successfully"})
 }
