@@ -4,8 +4,8 @@ import (
 	"WeMarketOnGolang/internal/handlers"
 	"WeMarketOnGolang/internal/services"
 	"WeMarketOnGolang/internal/services/categories"
+	"WeMarketOnGolang/internal/services/inventoryStatus"
 	"WeMarketOnGolang/internal/services/products"
-
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -20,6 +20,8 @@ func InitRoutes(router *gin.Engine, db *gorm.DB) {
 	userHandler := handlers.NewUserHandler(userService)
 	categoryService := categories.NewCategoryService(db)
 	categoryHandler := handlers.NewCategoryHandler(categoryService)
+	inventoryStatusService := inventoryStatus.NewInventoryStatusService(db)
+	inventoryStatusHandler := handlers.NewInventoryStatusHandler(inventoryStatusService)
 
 	apiV0 := router.Group("/v0")
 	{
@@ -52,6 +54,14 @@ func InitRoutes(router *gin.Engine, db *gorm.DB) {
 			categories.GET("/:id", categoryHandler.GetCategory)
 			categories.PUT("/:id", categoryHandler.UpdateCategory)
 			categories.DELETE("/:id", categoryHandler.DeleteCategory)
+		}
+		inventoryStatuses := apiV1.Group("/inventory-statuses")
+		{
+			inventoryStatuses.POST("/", inventoryStatusHandler.CreateInventoryStatus)
+			inventoryStatuses.GET("/:id", inventoryStatusHandler.GetInventoryStatusByID)
+			inventoryStatuses.GET("/", inventoryStatusHandler.GetAllInventoryStatuses)
+			inventoryStatuses.PUT("/:id", inventoryStatusHandler.UpdateInventoryStatus)
+			inventoryStatuses.DELETE("/:id", inventoryStatusHandler.DeleteInventoryStatus)
 		}
 
 		// Группа маршрутов для пользователей

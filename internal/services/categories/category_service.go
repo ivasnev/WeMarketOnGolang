@@ -78,9 +78,15 @@ func (s *CategoryService) UpdateCategory(id int, req dto.UpdateCategoryRequest) 
 		return nil, err
 	}
 
-	category.Name = *req.Name
-	category.Description = *req.Description
-	category.ParentCategoryID = req.ParentCategoryID
+	if req.Name != nil {
+		category.Name = *req.Name
+	}
+	if req.Description != nil {
+		category.Description = req.Description
+	}
+	if req.ParentCategoryID != nil {
+		category.ParentCategoryID = req.ParentCategoryID
+	}
 
 	if err := s.db.Save(&category).Error; err != nil {
 		return nil, err

@@ -20,43 +20,56 @@ func (s *InMemoryProductService) SeedProducts() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	// Пример тестовых продуктов
-	products := []*models.Product{
+	var description1 = "Описание продукта 1"
+	var imageURL1 = "http://example.com/image1.jpg"
+	var sku1 = "SKU1"
+	var weight1 float64 = 1.5
+	var dimensions1 = "10x10x10"
+	var manufacturerID1 int32 = 1
+
+	var description2 = "Описание продукта 2"
+	var imageURL2 = "http://example.com/image2.jpg"
+	var sku2 = "SKU2"
+	var weight2 float64 = 2.0
+	var dimensions2 = "15x15x15"
+	var manufacturerID2 int32 = 2
+
+	products := []models.Product{
 		{
 			Name:               "Продукт 1",
-			Description:        "Описание продукта 1",
+			Description:        &description1,
 			Price:              10.0,
 			CategoryID:         1,
 			Stock:              100,
-			ImageURL:           "http://example.com/image1.jpg",
-			Options:            "Цвет: красный",
-			Sku:                "SKU1",
-			Weight:             1.5,
-			Dimensions:         "10x10x10",
+			ImageURL:           &imageURL1,
+			Options:            nil,
+			Sku:                &sku1,
+			Weight:             &weight1,
+			Dimensions:         &dimensions1,
 			AvailabilityStatus: 1,
-			ManufacturerID:     1,
+			ManufacturerID:     &manufacturerID1,
 		},
 		{
 			Name:               "Продукт 2",
-			Description:        "Описание продукта 2",
+			Description:        &description2,
 			Price:              20.0,
 			CategoryID:         2,
-			Stock:              50,
-			ImageURL:           "http://example.com/image2.jpg",
-			Options:            "Цвет: синий",
-			Sku:                "SKU2",
-			Weight:             2.0,
-			Dimensions:         "15x15x15",
-			AvailabilityStatus: 1,
-			ManufacturerID:     2,
+			Stock:              200,
+			ImageURL:           &imageURL2,
+			Options:            nil,
+			Sku:                &sku2,
+			Weight:             &weight2,
+			Dimensions:         &dimensions2,
+			AvailabilityStatus: 2,
+			ManufacturerID:     &manufacturerID2,
 		},
-		// Добавьте дополнительные тестовые продукты по необходимости
+		// Добавьте сюда другие продукты, если нужно
 	}
-
+	now := time.Now()
 	for _, product := range products {
 		product.ID = s.nextID
-		product.AddedDate = time.Now()
-		s.products[s.nextID] = product
+		product.AddedDate = &now
+		s.products[s.nextID] = &product
 		s.nextID++
 	}
 }
@@ -76,7 +89,8 @@ func (s *InMemoryProductService) CreateProduct(ctx context.Context, product *mod
 
 	// Присваиваем ID и дату добавления новому продукту
 	product.ID = s.nextID
-	product.AddedDate = time.Now()
+	now := time.Now()
+	product.AddedDate = &now
 	s.products[s.nextID] = product
 	s.nextID++
 	return nil

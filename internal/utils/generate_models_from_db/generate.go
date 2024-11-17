@@ -16,9 +16,14 @@ func main() {
 
 	// Создаем объект генератора
 	g := gen.NewGenerator(gen.Config{
-		OutPath:      "./internal/models/generated", // Путь для сохранения сгенерированных моделей
-		ModelPkgPath: "internal/models/generated",
-		Mode:         gen.WithoutContext | gen.WithDefaultQuery,
+		FieldNullable:     true,
+		FieldCoverable:    true,
+		FieldSignable:     true,
+		FieldWithIndexTag: true,
+		FieldWithTypeTag:  true,
+		OutPath:           "./internal/models/generated", // Путь для сохранения сгенерированных моделей
+		ModelPkgPath:      "internal/models",
+		Mode:              gen.WithoutContext | gen.WithDefaultQuery | gen.WithQueryInterface,
 	})
 
 	// Используем подключение к базе данных
