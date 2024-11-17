@@ -3,7 +3,9 @@ package routes
 import (
 	"WeMarketOnGolang/internal/handlers"
 	"WeMarketOnGolang/internal/services"
+	"WeMarketOnGolang/internal/services/categories"
 	"WeMarketOnGolang/internal/services/products"
+
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -16,6 +18,8 @@ func InitRoutes(router *gin.Engine, db *gorm.DB) {
 	productHandler := handlers.NewProductHandler(productService)
 	productHandlerV0 := handlers.NewProductHandler(productServiceV0)
 	userHandler := handlers.NewUserHandler(userService)
+	categoryService := categories.NewCategoryService(db)
+	categoryHandler := handlers.NewCategoryHandler(categoryService)
 
 	apiV0 := router.Group("/v0")
 	{
@@ -40,6 +44,14 @@ func InitRoutes(router *gin.Engine, db *gorm.DB) {
 			products.POST("/", productHandler.CreateProduct)
 			products.PUT("/:id", productHandler.UpdateProduct)
 			products.DELETE("/:id", productHandler.DeleteProduct)
+		}
+		categories := apiV1.Group("/category")
+		{
+			categories.GET("/", categoryHandler.GetAllCategories)
+			categories.POST("/", categoryHandler.CreateCategory)
+			categories.GET("/:id", categoryHandler.GetCategory)
+			categories.PUT("/:id", categoryHandler.UpdateCategory)
+			categories.DELETE("/:id", categoryHandler.DeleteCategory)
 		}
 
 		// Группа маршрутов для пользователей
