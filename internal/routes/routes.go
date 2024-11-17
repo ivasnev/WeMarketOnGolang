@@ -28,8 +28,8 @@ func InitRoutes(router *gin.Engine, db *gorm.DB) {
 		// Группа маршрутов для продуктов
 		products := apiV0.Group("/products")
 		{
-			products.GET("/:id", productHandlerV0.GetProduct)
-			products.GET("/", productHandlerV0.ListProducts)
+			products.GET("/:id", productHandlerV0.GetProductByID)
+			products.GET("/", productHandlerV0.GetAllProducts)
 			products.POST("/", productHandlerV0.CreateProduct)
 			products.PUT("/:id", productHandlerV0.UpdateProduct)
 			products.DELETE("/:id", productHandlerV0.DeleteProduct)
@@ -41,8 +41,8 @@ func InitRoutes(router *gin.Engine, db *gorm.DB) {
 		// Группа маршрутов для продуктов
 		products := apiV1.Group("/products")
 		{
-			products.GET("/:id", productHandler.GetProduct)
-			products.GET("/", productHandler.ListProducts)
+			products.GET("/:id", productHandler.GetProductByID)
+			products.GET("/", productHandler.GetAllProducts)
 			products.POST("/", productHandler.CreateProduct)
 			products.PUT("/:id", productHandler.UpdateProduct)
 			products.DELETE("/:id", productHandler.DeleteProduct)

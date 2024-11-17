@@ -18,6 +18,6 @@ type UpdateCategoryRequest struct {
 type CategoryResponse struct {
 	ID               int32   `json:"id"`
 	Name             string  `json:"name"`
-	Description      *string `json:"description,omitempty"`
-	ParentCategoryID *int32  `json:"parent_category_id,omitempty"`
+	Description      *string `json:"description"`
+	ParentCategoryID *int32  `json:"parent_category_id"`
 }

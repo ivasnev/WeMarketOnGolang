@@ -16,10 +16,8 @@ type Product struct {
 	Stock              int32      `gorm:"column:stock;type:integer;not null;comment:Количество на складе" json:"stock"`                                                    // Количество на складе
 	ImageURL           *string    `gorm:"column:image_url;type:character varying(255);comment:URL изображения продукта" json:"image_url"`                                  // URL изображения продукта
 	AddedDate          *time.Time `gorm:"column:added_date;type:timestamp without time zone;default:CURRENT_TIMESTAMP;comment:Дата добавления продукта" json:"added_date"` // Дата добавления продукта
-	Options            *string    `gorm:"column:options;type:jsonb;comment:Варианты продукта (цвет, размер и т.д.)" json:"options"`                                        // Варианты продукта (цвет, размер и т.д.)
 	Sku                *string    `gorm:"column:sku;type:character varying(100);comment:Артикул продукта" json:"sku"`                                                      // Артикул продукта
 	Weight             *float64   `gorm:"column:weight;type:numeric(10,2);comment:Вес продукта" json:"weight"`                                                             // Вес продукта
-	Dimensions         *string    `gorm:"column:dimensions;type:jsonb;comment:Габариты продукта (длина, ширина, высота)" json:"dimensions"`                                // Габариты продукта (длина, ширина, высота)
 	AvailabilityStatus int32      `gorm:"column:availability_status;type:integer;not null;comment:ID статуса наличия продукта" json:"availability_status"`                 // ID статуса наличия продукта
 	ManufacturerID     *int32     `gorm:"column:manufacturer_id;type:integer;comment:Производитель продукта" json:"manufacturer_id"`                                       // Производитель продукта
 }

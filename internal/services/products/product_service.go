@@ -2,73 +2,56 @@ package products
 
 import (
 	"WeMarketOnGolang/internal/models"
-	"context"
-	"errors"
 	"gorm.io/gorm"
 )
 
+// ProductService предоставляет логику для работы с продуктами.
 type ProductService struct {
 	DB *gorm.DB
 }
 
-// NewProductService создаёт новый экземпляр ProductService
+// NewProductService создает новый экземпляр ProductService.
 func NewProductService(db *gorm.DB) *ProductService {
 	return &ProductService{DB: db}
 }
 
-// CreateProduct создаёт новый товар
-func (s *ProductService) CreateProduct(ctx context.Context, product *models.Product) error {
-	if err := s.DB.WithContext(ctx).Create(product).Error; err != nil {
+// CreateProduct создает новый продукт.
+func (s *ProductService) CreateProduct(product *models.Product) error {
+	if err := s.DB.Create(product).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-// GetProduct получает товар по ID
-func (s *ProductService) GetProduct(ctx context.Context, id int32) (*models.Product, error) {
+// GetProductByID возвращает продукт по ID.
+func (s *ProductService) GetProductByID(id int32) (*models.Product, error) {
 	var product models.Product
-	if err := s.DB.WithContext(ctx).First(&product, id).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, nil
-		}
+	if err := s.DB.First(&product, id).Error; err != nil {
 		return nil, err
 	}
 	return &product, nil
 }
 
-// ListProducts возвращает список всех товаров
-func (s *ProductService) ListProducts(ctx context.Context) ([]*models.Product, error) {
+// GetAllProducts возвращает все продукты.
+func (s *ProductService) GetAllProducts() ([]*models.Product, error) {
 	var products []*models.Product
-	if err := s.DB.WithContext(ctx).Find(&products).Error; err != nil {
+	if err := s.DB.Find(&products).Error; err != nil {
 		return nil, err
 	}
 	return products, nil
 }
 
-// UpdateProduct обновляет информацию о товаре по ID
-func (s *ProductService) UpdateProduct(ctx context.Context, id int32, updatedData *models.Product) error {
-	var product models.Product
-	// Ищем товар по ID
-	if err := s.DB.WithContext(ctx).First(&product, id).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return errors.New("product not found")
-		}
-		return err
-	}
-	// Обновляем нужные поля
-	product.Name = updatedData.Name
-	product.Description = updatedData.Description
-	product.Price = updatedData.Price
-	// Применяем изменения
-	if err := s.DB.WithContext(ctx).Save(&product).Error; err != nil {
+// UpdateProduct обновляет данные продукта.
+func (s *ProductService) UpdateProduct(id int32, product *models.Product) error {
+	if err := s.DB.Model(&models.Product{}).Where("id = ?", id).Updates(product).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-// DeleteProduct удаляет товар по ID
-func (s *ProductService) DeleteProduct(ctx context.Context, id int32) error {
-	if err := s.DB.WithContext(ctx).Delete(&models.Product{}, id).Error; err != nil {
+// DeleteProduct удаляет продукт по ID.
+func (s *ProductService) DeleteProduct(id int32) error {
+	if err := s.DB.Delete(&models.Product{}, id).Error; err != nil {
 		return err
 	}
 	return nil

@@ -157,11 +157,9 @@ CREATE TABLE products
     stock               INTEGER        NOT NULL,
     image_url           VARCHAR(255),
     added_date          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    options             JSONB,
     manufacturer        VARCHAR(100),
     sku                 VARCHAR(100),
     weight              NUMERIC(10, 2),
-    dimensions          JSONB,
     availability_status INTEGER        NOT NULL,
     manufacturer_id     INT,
     FOREIGN KEY (manufacturer_id) REFERENCES manufacturers (manufacturer_id),
@@ -189,15 +187,11 @@ ON COLUMN products.image_url IS 'URL изображения продукта';
 COMMENT
 ON COLUMN products.added_date IS 'Дата добавления продукта';
 COMMENT
-ON COLUMN products.options IS 'Варианты продукта (цвет, размер и т.д.)';
-COMMENT
 ON COLUMN products.manufacturer_id IS 'Производитель продукта';
 COMMENT
 ON COLUMN products.sku IS 'Артикул продукта';
 COMMENT
 ON COLUMN products.weight IS 'Вес продукта';
-COMMENT
-ON COLUMN products.dimensions IS 'Габариты продукта (длина, ширина, высота)';
 COMMENT
 ON COLUMN products.availability_status IS 'ID статуса наличия продукта';
 
@@ -273,7 +267,6 @@ COMMENT
 ON COLUMN cart_items.product_id IS 'ID продукта';
 COMMENT
 ON COLUMN cart_items.quantity IS 'Количество товара';
-COMMENT
 
 -- Таблица заказов
 CREATE TABLE orders
@@ -532,8 +525,8 @@ CREATE TABLE sales
     description TEXT,
     discount    NUMERIC(5, 2) NOT NULL,
     start_date  TIMESTAMP,
-    end_date    TIMESTAMP,
-    products    JSONB
+    end_date    TIMESTAMP
+--     products    JSONB
 );
 
 -- Описание для sales
@@ -551,8 +544,8 @@ COMMENT
 ON COLUMN sales.start_date IS 'Дата начала акции';
 COMMENT
 ON COLUMN sales.end_date IS 'Дата окончания акции';
-COMMENT
-ON COLUMN sales.products IS 'Список ID продуктов, участвующих в акции';
+-- COMMENT
+-- ON COLUMN sales.products IS 'Список ID продуктов, участвующих в акции';
 
 -- Таблица поддержки клиентов
 CREATE TABLE customer_support
