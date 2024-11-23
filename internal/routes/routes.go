@@ -2,6 +2,7 @@ package routes
 
 import (
 	"WeMarketOnGolang/internal/handlers"
+	"WeMarketOnGolang/internal/middleware"
 	"WeMarketOnGolang/internal/services"
 	"WeMarketOnGolang/internal/services/categories"
 	"WeMarketOnGolang/internal/services/inventoryStatus"
@@ -14,10 +15,11 @@ func InitRoutes(router *gin.Engine, db *gorm.DB) {
 	productService := products.NewProductService(db)
 	productServiceV0 := products.NewInMemoryProductService()
 	productServiceV0.SeedProducts()
-	userService := services.NewUserService(db)
 	productHandler := handlers.NewProductHandler(productService)
 	productHandlerV0 := handlers.NewProductHandler(productServiceV0)
-	userHandler := handlers.NewUserHandler(userService)
+	userService := services.NewUserService(db)
+	authService := services.NewAuthService()
+	userHandler := handlers.NewUserHandler(userService, authService)
 	categoryService := categories.NewCategoryService(db)
 	categoryHandler := handlers.NewCategoryHandler(categoryService)
 	inventoryStatusService := inventoryStatus.NewInventoryStatusService(db)
@@ -38,6 +40,8 @@ func InitRoutes(router *gin.Engine, db *gorm.DB) {
 
 	apiV1 := router.Group("/v1")
 	{
+		apiV1.Use(middleware.JWTMiddleware())
+
 		// Группа маршрутов для продуктов
 		products := apiV1.Group("/products")
 		{
@@ -68,9 +72,10 @@ func InitRoutes(router *gin.Engine, db *gorm.DB) {
 		users := apiV1.Group("/users")
 		{
 			users.GET("/:id", userHandler.GetUser)
-			//users.POST("/", userHandler.CreateUser)
-			//users.PUT("/:id", userHandler.UpdateUser)
-			//users.DELETE("/:id", userHandler.DeleteUser)
+			users.POST("/", userHandler.CreateUser)
+			users.PUT("/:id", userHandler.UpdateUser)
+			users.DELETE("/:id", userHandler.DeleteUser)
 		}
+
 	}
 }

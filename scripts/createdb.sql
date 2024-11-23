@@ -1,5 +1,14 @@
+CREATE TABLE if not exists manufacturers
+(
+    manufacturer_id SERIAL PRIMARY KEY,
+    name            VARCHAR(255) NOT NULL,
+    country         VARCHAR(100),
+    website         VARCHAR(255),
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Таблица ролей пользователей
-CREATE TABLE user_roles
+CREATE TABLE if not exists user_roles
 (
     id   SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL
@@ -14,7 +23,7 @@ COMMENT
 ON COLUMN user_roles.name IS 'Название роли';
 
 -- Таблица статусов заказов
-CREATE TABLE order_statuses
+CREATE TABLE if not exists order_statuses
 (
     id   SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL
@@ -29,7 +38,7 @@ COMMENT
 ON COLUMN order_statuses.name IS 'Название статуса';
 
 -- Таблица статусов платежей
-CREATE TABLE payment_statuses
+CREATE TABLE if not exists payment_statuses
 (
     id   SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL
@@ -44,7 +53,7 @@ COMMENT
 ON COLUMN payment_statuses.name IS 'Название статуса';
 
 -- Таблица статусов возвратов
-CREATE TABLE return_statuses
+CREATE TABLE if not exists return_statuses
 (
     id   SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL
@@ -59,7 +68,7 @@ COMMENT
 ON COLUMN return_statuses.name IS 'Название статуса';
 
 -- Таблица статусов запасов
-CREATE TABLE inventory_statuses
+CREATE TABLE if not exists inventory_statuses
 (
     id   SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL
@@ -74,7 +83,7 @@ COMMENT
 ON COLUMN inventory_statuses.name IS 'Название статуса';
 
 -- Таблица статусов промокодов
-CREATE TABLE promotion_statuses
+CREATE TABLE if not exists promotion_statuses
 (
     id   SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL
@@ -89,7 +98,7 @@ COMMENT
 ON COLUMN promotion_statuses.name IS 'Название статуса';
 
 -- Таблица статусов уведомлений
-CREATE TABLE notification_statuses
+CREATE TABLE if not exists notification_statuses
 (
     id   SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL
@@ -104,7 +113,7 @@ COMMENT
 ON COLUMN notification_statuses.name IS 'Название статуса';
 
 -- Таблица пользователей
-CREATE TABLE users
+CREATE TABLE if not exists users
 (
     id                SERIAL PRIMARY KEY,
     name              VARCHAR(100)        NOT NULL,
@@ -146,8 +155,31 @@ ON COLUMN users.account_status IS 'Статус аккаунта (активен
 COMMENT
 ON COLUMN users.order_count IS 'Количество заказов пользователя';
 
+-- Таблица категорий продуктов
+CREATE TABLE if not exists categories
+(
+    id                 SERIAL PRIMARY KEY,
+    name               VARCHAR(100) NOT NULL,
+    description        TEXT,
+    parent_category_id INTEGER,
+    FOREIGN KEY (parent_category_id) REFERENCES categories (id)
+);
+
+-- Описание для categories
+COMMENT
+    ON TABLE categories IS 'Таблица для хранения категорий продуктов';
+COMMENT
+    ON COLUMN categories.id IS 'ID категории';
+COMMENT
+    ON COLUMN categories.name IS 'Название категории';
+COMMENT
+    ON COLUMN categories.description IS 'Описание категории';
+COMMENT
+    ON COLUMN categories.parent_category_id IS 'ID родительской категории (для вложенных категорий)';
+
+
 -- Таблица продуктов
-CREATE TABLE products
+CREATE TABLE if not exists products
 (
     id                  SERIAL PRIMARY KEY,
     name                VARCHAR(255)   NOT NULL,
@@ -195,30 +227,8 @@ ON COLUMN products.weight IS 'Вес продукта';
 COMMENT
 ON COLUMN products.availability_status IS 'ID статуса наличия продукта';
 
--- Таблица категорий продуктов
-CREATE TABLE categories
-(
-    id                 SERIAL PRIMARY KEY,
-    name               VARCHAR(100) NOT NULL,
-    description        TEXT,
-    parent_category_id INTEGER,
-    FOREIGN KEY (parent_category_id) REFERENCES categories (id)
-);
-
--- Описание для categories
-COMMENT
-ON TABLE categories IS 'Таблица для хранения категорий продуктов';
-COMMENT
-ON COLUMN categories.id IS 'ID категории';
-COMMENT
-ON COLUMN categories.name IS 'Название категории';
-COMMENT
-ON COLUMN categories.description IS 'Описание категории';
-COMMENT
-ON COLUMN categories.parent_category_id IS 'ID родительской категории (для вложенных категорий)';
-
 -- Таблица корзины покупок
-CREATE TABLE shopping_cart
+CREATE TABLE if not exists shopping_cart
 (
     id           SERIAL PRIMARY KEY,
     user_id      INTEGER NOT NULL,
@@ -246,7 +256,7 @@ COMMENT
 ON COLUMN shopping_cart.total_amount IS 'Итоговая сумма корзины';
 
 -- Таблица товаров в корзине
-CREATE TABLE cart_items
+CREATE TABLE if not exists cart_items
 (
     id            SERIAL PRIMARY KEY,
     cart_id       INTEGER        NOT NULL,
@@ -269,7 +279,7 @@ COMMENT
 ON COLUMN cart_items.quantity IS 'Количество товара';
 
 -- Таблица заказов
-CREATE TABLE orders
+CREATE TABLE if not exists orders
 (
     id               SERIAL PRIMARY KEY,
     user_id          INTEGER        NOT NULL,
@@ -310,7 +320,7 @@ COMMENT
 ON COLUMN orders.shipping_method IS 'Метод доставки';
 
 -- Таблица товаров в заказе
-CREATE TABLE order_items
+CREATE TABLE if not exists order_items
 (
     id         SERIAL PRIMARY KEY,
     order_id   INTEGER        NOT NULL,
@@ -336,7 +346,7 @@ COMMENT
 ON COLUMN order_items.price IS 'Цена за единицу товара';
 
 -- Таблица платежей
-CREATE TABLE payments
+CREATE TABLE if not exists payments
 (
     id             SERIAL PRIMARY KEY,
     order_id       INTEGER        NOT NULL,
@@ -368,7 +378,7 @@ COMMENT
 ON COLUMN payments.transaction_id IS 'Транзакционный идентификатор';
 
 -- Таблица отзывов
-CREATE TABLE reviews
+CREATE TABLE if not exists reviews
 (
     id          SERIAL PRIMARY KEY,
     user_id     INTEGER NOT NULL,
@@ -401,7 +411,7 @@ COMMENT
 ON COLUMN reviews.status_id IS 'ID статуса отзыва';
 
 -- Таблица возвратов
-CREATE TABLE returns
+CREATE TABLE if not exists returns
 (
     id            SERIAL PRIMARY KEY,
     order_id      INTEGER NOT NULL,
@@ -431,7 +441,7 @@ COMMENT
 ON COLUMN returns.return_reason IS 'Причина возврата';
 
 -- Таблица промокодов
-CREATE TABLE promotions
+CREATE TABLE if not exists promotions
 (
     id                   SERIAL PRIMARY KEY,
     code                 VARCHAR(50)   NOT NULL,
@@ -465,7 +475,7 @@ COMMENT
 ON COLUMN promotions.usage_limit IS 'Лимит использования промокода';
 
 -- Таблица сессий пользователей
-CREATE TABLE user_sessions
+CREATE TABLE if not exists user_sessions
 (
     id         SERIAL PRIMARY KEY,
     user_id    INTEGER NOT NULL,
@@ -490,7 +500,7 @@ COMMENT
 ON COLUMN user_sessions.ip_address IS 'IP-адрес пользователя';
 
 -- Таблица уведомлений
-CREATE TABLE notifications
+CREATE TABLE if not exists notifications
 (
     id                SERIAL PRIMARY KEY,
     user_id           INTEGER     NOT NULL,
@@ -518,7 +528,7 @@ COMMENT
 ON COLUMN notifications.read_status IS 'Статус прочтения уведомления';
 
 -- Таблица акций
-CREATE TABLE sales
+CREATE TABLE if not exists sales
 (
     id          SERIAL PRIMARY KEY,
     name        VARCHAR(100)  NOT NULL,
@@ -548,7 +558,7 @@ ON COLUMN sales.end_date IS 'Дата окончания акции';
 -- ON COLUMN sales.products IS 'Список ID продуктов, участвующих в акции';
 
 -- Таблица поддержки клиентов
-CREATE TABLE customer_support
+CREATE TABLE if not exists customer_support
 (
     id           SERIAL PRIMARY KEY,
     user_id      INTEGER NOT NULL,
@@ -580,7 +590,7 @@ COMMENT
 ON COLUMN customer_support.response IS 'Ответ сотрудника поддержки';
 
 -- Таблица истории изменений продуктов
-CREATE TABLE product_changes
+CREATE TABLE if not exists product_changes
 (
     id            SERIAL PRIMARY KEY,
     product_id    INTEGER     NOT NULL,
@@ -612,7 +622,7 @@ COMMENT
 ON COLUMN product_changes.changed_by IS 'ID пользователя, который внёс изменение';
 
 -- Таблица подписки на новости
-CREATE TABLE newsletter_subscriptions
+CREATE TABLE if not exists newsletter_subscriptions
 (
     id                SERIAL PRIMARY KEY,
     email             VARCHAR(100) NOT NULL,
@@ -633,7 +643,7 @@ COMMENT
 ON COLUMN newsletter_subscriptions.status IS 'Статус подписки (активна/отписался)';
 
 -- Таблица логов системы
-CREATE TABLE system_logs
+CREATE TABLE if not exists system_logs
 (
     id       SERIAL PRIMARY KEY,
     log_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -656,12 +666,3 @@ COMMENT
 ON COLUMN system_logs.message IS 'Текст сообщения лога';
 COMMENT
 ON COLUMN system_logs.user_id IS 'ID пользователя, связанного с логом';
-
-CREATE TABLE manufacturers
-(
-    manufacturer_id SERIAL PRIMARY KEY,
-    name            VARCHAR(255) NOT NULL,
-    country         VARCHAR(100),
-    website         VARCHAR(255),
-    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);

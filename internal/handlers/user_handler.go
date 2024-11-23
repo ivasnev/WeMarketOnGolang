@@ -1,68 +1,123 @@
 package handlers
 
 import (
-	"net/http"
-	"strconv"
-
 	"WeMarketOnGolang/internal/models"
 	"WeMarketOnGolang/internal/services"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"net/http"
+	"strconv"
 )
 
 type UserHandler struct {
 	UserService *services.UserService
+	AuthService *services.AuthService
 }
 
-// NewUserHandler создает новый экземпляр UserHandler
-func NewUserHandler(userService *services.UserService) *UserHandler {
-	return &UserHandler{UserService: userService}
+func NewUserHandler(userService *services.UserService, authService *services.AuthService) *UserHandler {
+	return &UserHandler{UserService: userService, AuthService: authService}
 }
 
-// CreateUser создает нового пользователя
-func (h *UserHandler) CreateUser(c *gin.Context) {
+// Регистрация нового пользователя
+func (h *UserHandler) Register(c *gin.Context) {
 	var user models.User
 	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if err := h.UserService.CreateUser(c.Request.Context(), &user); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+
+	if err := h.UserService.CreateUser(&user); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusCreated, user)
+
+	c.JSON(http.StatusCreated, gin.H{"message": "User created"})
 }
 
-// GetUser получает пользователя по ID
-func (h *UserHandler) GetUser(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+// Вход пользователя
+func (h *UserHandler) Login(c *gin.Context) {
+	var loginData struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+	if err := c.ShouldBindJSON(&loginData); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	user, err := h.UserService.GetUserByID(c.Request.Context(), uint(id))
+	user, err := h.UserService.AuthenticateUser(loginData.Email, loginData.Password)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve user"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return
 	}
-	if user == nil {
+
+	token, err := h.AuthService.GenerateToken(user.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"token": token})
+}
+
+// Получение данных пользователя по ID
+func (h *UserHandler) GetUser(c *gin.Context) {
+	num, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		fmt.Println("Ошибка:", err)
+		return
+	}
+
+	// Преобразуем int в int32
+	userID := int32(num)
+	user, err := h.UserService.GetUserByID(userID)
+	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
+
 	c.JSON(http.StatusOK, user)
 }
 
-// UpdateUser обновляет данные пользователя
+// Обновление данных пользователя
 func (h *UserHandler) UpdateUser(c *gin.Context) {
-	var user models.User
-	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+	num, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		fmt.Println("Ошибка:", err)
 		return
 	}
 
-	if err := h.UserService.UpdateUser(c.Request.Context(), &user); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user"})
+	// Преобразуем int в int32
+	userID := int32(num)
+	var user models.User
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, user)
+
+	if err := h.UserService.UpdateUser(userID, &user); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "User updated"})
+}
+
+// Удаление пользователя
+func (h *UserHandler) DeleteUser(c *gin.Context) {
+
+	num, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		fmt.Println("Ошибка:", err)
+		return
+	}
+
+	// Преобразуем int в int32
+	userID := int32(num)
+	if err := h.UserService.DeleteUser(userID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "User deleted"})
 }
