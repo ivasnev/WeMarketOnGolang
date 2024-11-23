@@ -3,8 +3,10 @@ package handlers
 import (
 	"WeMarketOnGolang/internal/dto"
 	"WeMarketOnGolang/internal/services"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 )
 
 // Структура для работы с сервисом авторизации
@@ -38,15 +40,29 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, loginResponse)
 }
 
+func (h *AuthHandler) getUserIdFromContext(c *gin.Context) (int32, error) {
+	userID, exists := c.Get("userID")
+	if !exists {
+		return 0, errors.New("No userID found in context")
+	}
+
+	// Преобразуем userID в int32
+	userIDInt, err := strconv.Atoi(userID.(string)) // преобразуем строку в int
+	if err != nil {
+		return 0, errors.New("Invalid userID")
+	}
+	return int32(userIDInt), nil
+}
+
 // Хендлер для логаута
 func (h *AuthHandler) Logout(c *gin.Context) {
-	userID, exists := c.Get("userID") // Предполагаем, что userID хранится в контексте после авторизации
-	if !exists {
+	userID, err := h.getUserIdFromContext(c) // Предполагаем, что userID хранится в контексте после авторизации
+	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
 		return
 	}
 
-	err := h.authService.Logout(userID.(int32))
+	err = h.authService.Logout(userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
