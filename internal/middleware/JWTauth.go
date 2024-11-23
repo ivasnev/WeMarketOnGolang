@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"WeMarketOnGolang/internal/services"
+	"WeMarketOnGolang/internal"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
@@ -22,9 +22,12 @@ func JWTMiddleware() gin.HandlerFunc {
 		tokenString = strings.TrimPrefix(tokenString, "Bearer ")
 
 		// Разбор и валидация токена
-		token, err := jwt.ParseWithClaims(tokenString, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
-			return services.JWTSecretKey, nil
-		})
+		token, err := jwt.ParseWithClaims(
+			tokenString,
+			&jwt.StandardClaims{},
+			func(token *jwt.Token) (interface{}, error) {
+				return internal.JWTSecretKey, nil
+			})
 		if err != nil || !token.Valid {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
 			c.Abort()

@@ -61,9 +61,9 @@ INSERT INTO categories (name, description, parent_category_id) VALUES
                                                                    ('Laptops', 'Portable computers', 1);
 
 -- Вставка продуктов
-INSERT INTO products (name, description, price, category_id, stock, manufacturer, sku, weight, availability_status, manufacturer_id) VALUES
-                                                                                                                                         ('Laptop 1', 'High-performance laptop', 999.99, 3, 100, 'Manufacturer1', 'SKU123', 2.5, 1, 1),
-                                                                                                                                         ('Washing Machine', 'Efficient washing machine', 499.99, 2, 50, 'Manufacturer2', 'SKU124', 80.0, 1, 2);
+INSERT INTO products (name, description, price, category_id, stock, sku, weight, availability_status, manufacturer_id) VALUES
+                                                                                                                                         ('Laptop 1', 'High-performance laptop', 999.99, 3, 100, 'SKU123', 2.5, 1, 1),
+                                                                                                                                         ('Washing Machine', 'Efficient washing machine', 499.99, 2, 50, 'SKU124', 80.0, 1, 2);
 
 -- Вставка товаров в корзину
 INSERT INTO shopping_cart (user_id, status, total_amount) VALUES

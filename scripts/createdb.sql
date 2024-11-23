@@ -189,7 +189,6 @@ CREATE TABLE if not exists products
     stock               INTEGER        NOT NULL,
     image_url           VARCHAR(255),
     added_date          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    manufacturer        VARCHAR(100),
     sku                 VARCHAR(100),
     weight              NUMERIC(10, 2),
     availability_status INTEGER        NOT NULL,

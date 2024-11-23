@@ -16,7 +16,7 @@ for arg in "$@"; do
     --create-db)
       CREATE_DB=1
       ;;
-    --filldb)
+    --fill-db)
       FILL_DB=1
       ;;
   esac
@@ -36,7 +36,7 @@ if [ "$CREATE_DB" -eq 1 ]; then
   echo "Создаем базу данных..."
 
   # Создание базы данных, если она не существует
-  psql -h "$DB_HOST" -U "$DB_USER" -p "$DB_PORT" -c "CREATE DATABASE IF NOT EXISTS $DB_NAME;"
+  psql -h "$DB_HOST" -U "$DB_USER" -p "$DB_PORT" -c "CREATE DATABASE $DB_NAME;"
   echo "База данных $DB_NAME создана!"
 
   # Выполняем SQL-скрипт для создания таблиц

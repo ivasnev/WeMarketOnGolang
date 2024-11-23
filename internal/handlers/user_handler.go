@@ -1,123 +1,153 @@
 package handlers
 
 import (
+	"WeMarketOnGolang/internal/dto"
 	"WeMarketOnGolang/internal/models"
 	"WeMarketOnGolang/internal/services"
-	"fmt"
+	"errors"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"strconv"
 )
 
 type UserHandler struct {
-	UserService *services.UserService
-	AuthService *services.AuthService
+	userService *services.UserService
 }
 
-func NewUserHandler(userService *services.UserService, authService *services.AuthService) *UserHandler {
-	return &UserHandler{UserService: userService, AuthService: authService}
+func NewUserHandler(userService *services.UserService) *UserHandler {
+	return &UserHandler{userService: userService}
 }
 
-// Регистрация нового пользователя
+func (h *UserHandler) getUserIdFromContext(c *gin.Context) (int32, error) {
+	userID, exists := c.Get("userID")
+	if !exists {
+		return 0, errors.New("No userID found in context")
+	}
+
+	// Преобразуем userID в int32
+	userIDInt, err := strconv.Atoi(userID.(string)) // преобразуем строку в int
+	if err != nil {
+		return 0, errors.New("Invalid userID")
+	}
+	return int32(userIDInt), nil
+}
+
 func (h *UserHandler) Register(c *gin.Context) {
-	var user models.User
-	if err := c.ShouldBindJSON(&user); err != nil {
+	var request dto.CreateUserDTO
+	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := h.UserService.CreateUser(&user); err != nil {
+	// Хешируем пароль перед сохранением
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	user := models.User{
+		Email:        request.Email,
+		PasswordHash: string(passwordHash),
+		Name:         request.Name,
+		Phone:        request.Phone,
+		Address:      request.Address,
+		RoleID:       1, // Роль по умолчанию
+	}
+
+	if err := h.userService.CreateUser(&user); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating user"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"message": "User registered successfully"})
+}
+
+func (h *UserHandler) GetCurrentUser(c *gin.Context) {
+	userID, err := h.getUserIdFromContext(c)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "User created"})
+	user, err := h.userService.GetUserByID(userID)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+		return
+	}
+
+	response := dto.UserResponseDTO{
+		ID:      user.ID,
+		Email:   user.Email,
+		Name:    user.Name,
+		Phone:   user.Phone,
+		Address: user.Address,
+		RoleID:  user.RoleID,
+	}
+
+	c.JSON(http.StatusOK, gin.H{"user": response})
 }
 
-// Вход пользователя
-func (h *UserHandler) Login(c *gin.Context) {
-	var loginData struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
+func (h *UserHandler) UpdateCurrentUser(c *gin.Context) {
+	userID, err := h.getUserIdFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
-	if err := c.ShouldBindJSON(&loginData); err != nil {
+
+	var request dto.UpdateUserDTO
+	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	user, err := h.UserService.AuthenticateUser(loginData.Email, loginData.Password)
+	user, err := h.userService.GetUserByID(userID)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
 		return
 	}
 
-	token, err := h.AuthService.GenerateToken(user.ID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+	// Обновление только тех полей, которые переданы в запросе
+	if request.Name != nil {
+		user.Name = *request.Name
+	}
+	if request.Phone != nil {
+		user.Phone = request.Phone
+	}
+	if request.Address != nil {
+		user.Address = request.Address
+	}
+
+	if err := h.userService.UpdateUser(user); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error updating user"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"token": token})
+	c.JSON(http.StatusOK, gin.H{"message": "User updated successfully"})
 }
 
-// Получение данных пользователя по ID
-func (h *UserHandler) GetUser(c *gin.Context) {
-	num, err := strconv.Atoi(c.Param("id"))
+func (h *UserHandler) GetUserByID(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		fmt.Println("Ошибка:", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
 
-	// Преобразуем int в int32
-	userID := int32(num)
-	user, err := h.UserService.GetUserByID(userID)
+	user, err := h.userService.GetUserByID(int32(id))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
-}
-
-// Обновление данных пользователя
-func (h *UserHandler) UpdateUser(c *gin.Context) {
-	num, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		fmt.Println("Ошибка:", err)
-		return
+	response := dto.UserResponseDTO{
+		ID:      user.ID,
+		Email:   user.Email,
+		Name:    user.Name,
+		Phone:   user.Phone,
+		Address: user.Address,
+		RoleID:  user.RoleID,
 	}
 
-	// Преобразуем int в int32
-	userID := int32(num)
-	var user models.User
-	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	if err := h.UserService.UpdateUser(userID, &user); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "User updated"})
-}
-
-// Удаление пользователя
-func (h *UserHandler) DeleteUser(c *gin.Context) {
-
-	num, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		fmt.Println("Ошибка:", err)
-		return
-	}
-
-	// Преобразуем int в int32
-	userID := int32(num)
-	if err := h.UserService.DeleteUser(userID); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "User deleted"})
+	c.JSON(http.StatusOK, gin.H{"user": response})
 }

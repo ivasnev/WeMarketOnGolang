@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"WeMarketOnGolang/internal"
 	"WeMarketOnGolang/internal/handlers"
 	"WeMarketOnGolang/internal/middleware"
 	"WeMarketOnGolang/internal/services"
@@ -17,9 +18,10 @@ func InitRoutes(router *gin.Engine, db *gorm.DB) {
 	productServiceV0.SeedProducts()
 	productHandler := handlers.NewProductHandler(productService)
 	productHandlerV0 := handlers.NewProductHandler(productServiceV0)
+	authService := services.NewJWTAuthService(internal.JWTSecretKey, db)
+	authHandler := handlers.NewAuthHandler(authService)
 	userService := services.NewUserService(db)
-	authService := services.NewAuthService()
-	userHandler := handlers.NewUserHandler(userService, authService)
+	userHandler := handlers.NewUserHandler(userService)
 	categoryService := categories.NewCategoryService(db)
 	categoryHandler := handlers.NewCategoryHandler(categoryService)
 	inventoryStatusService := inventoryStatus.NewInventoryStatusService(db)
@@ -40,11 +42,11 @@ func InitRoutes(router *gin.Engine, db *gorm.DB) {
 
 	apiV1 := router.Group("/v1")
 	{
-		apiV1.Use(middleware.JWTMiddleware())
 
 		// Группа маршрутов для продуктов
 		products := apiV1.Group("/products")
 		{
+			products.Use(middleware.JWTMiddleware())
 			products.GET("/:id", productHandler.GetProductByID)
 			products.GET("/", productHandler.GetAllProducts)
 			products.POST("/", productHandler.CreateProduct)
@@ -53,6 +55,7 @@ func InitRoutes(router *gin.Engine, db *gorm.DB) {
 		}
 		categories := apiV1.Group("/category")
 		{
+			categories.Use(middleware.JWTMiddleware())
 			categories.GET("/", categoryHandler.GetAllCategories)
 			categories.POST("/", categoryHandler.CreateCategory)
 			categories.GET("/:id", categoryHandler.GetCategory)
@@ -61,6 +64,7 @@ func InitRoutes(router *gin.Engine, db *gorm.DB) {
 		}
 		inventoryStatuses := apiV1.Group("/inventory-statuses")
 		{
+			inventoryStatuses.Use(middleware.JWTMiddleware())
 			inventoryStatuses.POST("/", inventoryStatusHandler.CreateInventoryStatus)
 			inventoryStatuses.GET("/:id", inventoryStatusHandler.GetInventoryStatusByID)
 			inventoryStatuses.GET("/", inventoryStatusHandler.GetAllInventoryStatuses)
@@ -68,13 +72,25 @@ func InitRoutes(router *gin.Engine, db *gorm.DB) {
 			inventoryStatuses.DELETE("/:id", inventoryStatusHandler.DeleteInventoryStatus)
 		}
 
-		// Группа маршрутов для пользователей
-		users := apiV1.Group("/users")
+		authGroup := apiV1.Group("/auth")
 		{
-			users.GET("/:id", userHandler.GetUser)
-			users.POST("/", userHandler.CreateUser)
-			users.PUT("/:id", userHandler.UpdateUser)
-			users.DELETE("/:id", userHandler.DeleteUser)
+			authGroup.POST("/jwt/login", authHandler.Login)
+			authGroup.POST("/jwt/logout", middleware.JWTMiddleware(), authHandler.Logout)
+			authGroup.POST("/register", userHandler.Register)
+			//authGroup.POST("/forgot-password", userHandler.ForgotPassword)
+			//authGroup.POST("/reset-password", userHandler.ResetPassword)
+			//authGroup.POST("/request-verify-token", userHandler.RequestVerifyToken)
+			//authGroup.POST("/verify", userHandler.Verify)
+		}
+
+		usersGroup := apiV1.Group("/users")
+		{
+			usersGroup.Use(middleware.JWTMiddleware())
+			usersGroup.GET("/me", userHandler.GetCurrentUser)
+			usersGroup.PATCH("/me", userHandler.UpdateCurrentUser)
+			usersGroup.GET("/:id", userHandler.GetUserByID)
+			//usersGroup.PATCH("/:id", userHandler.UpdateUserByID)
+			//usersGroup.DELETE("/:id", userHandler.DeleteUserByID)
 		}
 
 	}
