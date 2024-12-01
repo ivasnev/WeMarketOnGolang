@@ -1,6 +1,7 @@
 package products
 
 import (
+	"WeMarketOnGolang/internal/dto"
 	"WeMarketOnGolang/internal/models"
 	"errors"
 	"sync"
@@ -102,7 +103,7 @@ func (s *InMemoryProductService) GetProductByID(id int32) (*models.Product, erro
 }
 
 // ListProducts возвращает список всех продуктов
-func (s *InMemoryProductService) GetAllProducts() ([]*models.Product, error) {
+func (s *InMemoryProductService) GetAllProducts(filter *dto.ProductFilter) ([]*models.Product, int64, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -111,7 +112,7 @@ func (s *InMemoryProductService) GetAllProducts() ([]*models.Product, error) {
 	for _, product := range s.products {
 		products = append(products, product)
 	}
-	return products, nil
+	return products, int64(len(products)), nil
 }
 
 // UpdateProduct обновляет продукт по ID

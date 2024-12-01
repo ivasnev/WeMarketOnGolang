@@ -1,6 +1,7 @@
 package products
 
 import (
+	"WeMarketOnGolang/internal/dto"
 	"WeMarketOnGolang/internal/models"
 	"gorm.io/gorm"
 )
@@ -33,12 +34,40 @@ func (s *ProductService) GetProductByID(id int32) (*models.Product, error) {
 }
 
 // GetAllProducts возвращает все продукты.
-func (s *ProductService) GetAllProducts() ([]*models.Product, error) {
+func (s *ProductService) GetAllProducts(filter *dto.ProductFilter) ([]*models.Product, int64, error) {
 	var products []*models.Product
-	if err := s.DB.Find(&products).Error; err != nil {
-		return nil, err
+	var total int64
+
+	query := s.DB.Model(&models.Product{})
+
+	// Применяем фильтры
+	if filter.Name != nil {
+		query = query.Where("name ILIKE ?", "%"+*filter.Name+"%") // Для поиска по подстроке
 	}
-	return products, nil
+	if filter.MinPrice != nil {
+		query = query.Where("price >= ?", *filter.MinPrice)
+	}
+	if filter.MaxPrice != nil {
+		query = query.Where("price <= ?", *filter.MaxPrice)
+	}
+
+	// Считаем общее количество записей для пагинации
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// Пагинация
+	if filter.Page > 0 && filter.PageSize > 0 {
+		offset := (filter.Page - 1) * filter.PageSize
+		query = query.Limit(filter.PageSize).Offset(offset)
+	}
+
+	// Выполняем запрос
+	if err := query.Find(&products).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return products, total, nil
 }
 
 // UpdateProduct обновляет данные продукта.

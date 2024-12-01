@@ -3,23 +3,22 @@ package handlers
 import (
 	"WeMarketOnGolang/internal/dto"
 	"WeMarketOnGolang/internal/models"
-	"WeMarketOnGolang/internal/services/products" // Путь к пакету с интерфейсом ProductService
+	"WeMarketOnGolang/internal/services/products"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"net/http"
 	"strconv"
 )
 
-// ProductHandler представляет обработчики для продуктов.
 type ProductHandler struct {
 	ProductService products.ProductServiceInterface
 }
 
-// NewProductHandler создает новый экземпляр ProductHandler.
 func NewProductHandler(service products.ProductServiceInterface) *ProductHandler {
 	return &ProductHandler{ProductService: service}
 }
 
-// CreateProduct создает новый продукт.
 func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	var dtoObj dto.CreateProductDTO
 	if err := c.ShouldBindJSON(&dtoObj); err != nil {
@@ -70,7 +69,6 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	})
 }
 
-// GetProductByID возвращает продукт по ID.
 func (h *ProductHandler) GetProductByID(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -100,17 +98,43 @@ func (h *ProductHandler) GetProductByID(c *gin.Context) {
 	})
 }
 
-// GetAllProducts возвращает все продукты.
 func (h *ProductHandler) GetAllProducts(c *gin.Context) {
-	allProducts, err := h.ProductService.GetAllProducts()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch allProducts"})
+
+	filter := &dto.ProductFilter{}
+	if err := c.ShouldBindQuery(&filter); err != nil {
+		var errorMessages []string
+
+		if errs, ok := err.(validator.ValidationErrors); ok {
+			for _, e := range errs {
+				errorMessages = append(errorMessages, fmt.Sprintf("Field '%s' failed validation, condition: %s", e.Field(), e.ActualTag()))
+			}
+		} else {
+			errorMessages = append(errorMessages, err.Error())
+		}
+
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   "Validation failed",
+			"details": errorMessages,
+			"code":    http.StatusUnprocessableEntity,
+		})
 		return
 	}
 
-	response := []dto.ProductResponseDTO{}
+	allProducts, total, err := h.ProductService.GetAllProducts(filter)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch products"})
+		return
+	}
+
+	response := dto.ProductResponseDTOWithPagination{
+		Products: []dto.ProductResponseDTO{},
+		Total:    total,
+		PageSize: filter.PageSize,
+		Page:     filter.Page,
+	}
+
 	for _, product := range allProducts {
-		response = append(response, dto.ProductResponseDTO{
+		response.Products = append(response.Products, dto.ProductResponseDTO{
 			ID:                 product.ID,
 			Name:               product.Name,
 			Description:        product.Description,
@@ -129,7 +153,6 @@ func (h *ProductHandler) GetAllProducts(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// UpdateProduct обновляет продукт по ID.
 func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -184,7 +207,6 @@ func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Product updated successfully"})
 }
 
-// DeleteProduct удаляет продукт по ID.
 func (h *ProductHandler) DeleteProduct(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {

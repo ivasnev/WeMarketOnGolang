@@ -10,6 +10,7 @@ import (
 	"WeMarketOnGolang/internal/services/products"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"time"
 )
 
 func InitRoutes(router *gin.Engine, db *gorm.DB) {
@@ -42,7 +43,7 @@ func InitRoutes(router *gin.Engine, db *gorm.DB) {
 
 	apiV1 := router.Group("/v1")
 	{
-
+		apiV1.Use(middleware.TimeoutMiddleware(20 * time.Millisecond))
 		// Группа маршрутов для продуктов
 		products := apiV1.Group("/products")
 		{
