@@ -8,6 +8,7 @@ import (
 	"WeMarketOnGolang/internal/services/categories"
 	"WeMarketOnGolang/internal/services/inventoryStatus"
 	"WeMarketOnGolang/internal/services/products"
+	"WeMarketOnGolang/internal/services/tasks"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"time"
@@ -27,6 +28,8 @@ func InitRoutes(router *gin.Engine, db *gorm.DB) {
 	categoryHandler := handlers.NewCategoryHandler(categoryService)
 	inventoryStatusService := inventoryStatus.NewInventoryStatusService(db)
 	inventoryStatusHandler := handlers.NewInventoryStatusHandler(inventoryStatusService)
+	taskService := tasks.NewTaskService(5) // Создаем сервис задач
+	taskHandler := handlers.NewTaskHandler(taskService)
 
 	apiV0 := router.Group("/v0")
 	{
@@ -43,7 +46,7 @@ func InitRoutes(router *gin.Engine, db *gorm.DB) {
 
 	apiV1 := router.Group("/v1")
 	{
-		apiV1.Use(middleware.TimeoutMiddleware(20 * time.Millisecond))
+		apiV1.Use(middleware.TimeoutMiddleware(5 * time.Second))
 		// Группа маршрутов для продуктов
 		products := apiV1.Group("/products")
 		{
@@ -94,5 +97,14 @@ func InitRoutes(router *gin.Engine, db *gorm.DB) {
 			//usersGroup.DELETE("/:id", userHandler.DeleteUserByID)
 		}
 
+		tasksGroup := apiV1.Group("/tasks")
+		{
+			// Управление задачами
+			tasksGroup.POST("/inf", taskHandler.CreateTaskInf)
+			tasksGroup.POST("/classic", taskHandler.CreateTaskClassic)
+			tasksGroup.GET("", taskHandler.GetAllTasks)
+			tasksGroup.GET("/:id", taskHandler.GetTask)
+			tasksGroup.DELETE("/:id", taskHandler.CancelTask)
+		}
 	}
 }
