@@ -28,8 +28,8 @@ func NewProductHandler(service products.ProductServiceInterface) *ProductHandler
 // @Produce json
 // @Param product body dto.CreateProductDTO true "Данные продукта"
 // @Success 201 {object} dto.ProductResponseDTO
-// @Failure 400 {object} map[string]interface{} "Неверные данные"
-// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
+// @Failure 400 {object} dto.ErrorResponse "Неверные данные"
+// @Failure 500 {object} dto.ErrorResponse "Ошибка сервера"
 // @Security BearerAuth
 // @Router /v1/products [post]
 func (h *ProductHandler) CreateProduct(c *gin.Context) {
@@ -91,7 +91,7 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 // @Produce json
 // @Param id path int true "ID продукта"
 // @Success 200 {object} dto.ProductResponseDTO
-// @Failure 400 {object} map[string]interface{} "Неверный ID"
+// @Failure 400 {object} dto.ErrorResponse "Неверный ID"
 // @Failure 404 {object} map[string]interface{} "Продукт не найден"
 // @Security BearerAuth
 // @Router /v1/products/{id} [get]
@@ -137,7 +137,7 @@ func (h *ProductHandler) GetProductByID(c *gin.Context) {
 // @Param max_price query number false "Максимальная цена"
 // @Success 200 {object} dto.ProductResponseDTOWithPagination
 // @Failure 422 {object} map[string]interface{} "Ошибка валидации"
-// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
+// @Failure 500 {object} dto.ErrorResponse "Ошибка сервера"
 // @Security BearerAuth
 // @Router /v1/products [get]
 func (h *ProductHandler) GetAllProducts(c *gin.Context) {
@@ -204,8 +204,8 @@ func (h *ProductHandler) GetAllProducts(c *gin.Context) {
 // @Param id path int true "ID продукта"
 // @Param product body dto.UpdateProductDTO true "Данные для обновления продукта"
 // @Success 200 {object} map[string]interface{} "Продукт успешно обновлен"
-// @Failure 400 {object} map[string]interface{} "Неверный ID или данные"
-// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
+// @Failure 400 {object} dto.ErrorResponse "Неверный ID или данные"
+// @Failure 500 {object} dto.ErrorResponse "Ошибка сервера"
 // @Security BearerAuth
 // @Router /v1/products/{id} [put]
 func (h *ProductHandler) UpdateProduct(c *gin.Context) {
@@ -271,8 +271,8 @@ func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 // @Produce json
 // @Param id path int true "ID продукта"
 // @Success 200 {object} map[string]interface{} "Продукт успешно удален"
-// @Failure 400 {object} map[string]interface{} "Неверный ID"
-// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
+// @Failure 400 {object} dto.ErrorResponse "Неверный ID"
+// @Failure 500 {object} dto.ErrorResponse "Ошибка сервера"
 // @Security BearerAuth
 // @Router /v1/products/{id} [delete]
 func (h *ProductHandler) DeleteProduct(c *gin.Context) {

@@ -28,8 +28,8 @@ func NewCategoryHandler(service *categories.CategoryService) *CategoryHandler {
 // @Produce json
 // @Param category body dto.CreateCategoryRequest true "Данные для создания категории"
 // @Success 201 {object} dto.CategoryResponse "Созданная категория"
-// @Failure 400 {object} map[string]interface{} "Ошибка валидации входных данных"
-// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
+// @Failure 400 {object} dto.ErrorResponse "Ошибка валидации входных данных"
+// @Failure 500 {object} dto.ErrorResponse "Ошибка сервера"
 // @Security BearerAuth
 // @Router /v1/category [post]
 func (h *CategoryHandler) CreateCategory(c *gin.Context) {
@@ -56,7 +56,7 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 // @Produce json
 // @Param id path int true "ID категории"
 // @Success 200 {object} dto.CategoryResponse "Найденная категория"
-// @Failure 400 {object} map[string]interface{} "Некорректный ID категории"
+// @Failure 400 {object} dto.ErrorResponse "Некорректный ID категории"
 // @Failure 404 {object} map[string]interface{} "Категория не найдена"
 // @Security BearerAuth
 // @Router /v1/category/{id} [get]
@@ -82,7 +82,7 @@ func (h *CategoryHandler) GetCategory(c *gin.Context) {
 // @Tags v1/categories
 // @Produce json
 // @Success 200 {array} dto.CategoryResponse "Список категорий"
-// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
+// @Failure 500 {object} dto.ErrorResponse "Ошибка сервера"
 // @Security BearerAuth
 // @Router /v1/category [get]
 func (h *CategoryHandler) GetAllCategories(c *gin.Context) {
@@ -104,8 +104,8 @@ func (h *CategoryHandler) GetAllCategories(c *gin.Context) {
 // @Param id path int true "ID категории"
 // @Param category body dto.UpdateCategoryRequest true "Данные для обновления категории"
 // @Success 200 {object} dto.CategoryResponse "Обновленная категория"
-// @Failure 400 {object} map[string]interface{} "Некорректный ID категории или ошибка валидации"
-// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
+// @Failure 400 {object} dto.ErrorResponse "Некорректный ID категории или ошибка валидации"
+// @Failure 500 {object} dto.ErrorResponse "Ошибка сервера"
 // @Security BearerAuth
 // @Router /v1/category/{id} [put]
 func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
@@ -138,8 +138,8 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 // @Produce json
 // @Param id path int true "ID категории"
 // @Success 200 {object} map[string]interface{} "Сообщение об успешном удалении"
-// @Failure 400 {object} map[string]interface{} "Некорректный ID категории"
-// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
+// @Failure 400 {object} dto.ErrorResponse "Некорректный ID категории"
+// @Failure 500 {object} dto.ErrorResponse "Ошибка сервера"
 // @Security BearerAuth
 // @Router /v1/category/{id} [delete]
 func (h *CategoryHandler) DeleteCategory(c *gin.Context) {

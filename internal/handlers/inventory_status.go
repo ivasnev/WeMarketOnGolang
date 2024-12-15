@@ -28,8 +28,8 @@ func NewInventoryStatusHandler(service *inventoryStatus.InventoryStatusService) 
 // @Produce json
 // @Param status body dto.InventoryStatusDTO true "Информация о статусе"
 // @Success 201 {object} map[string]interface{} "Созданный статус"
-// @Failure 400 {object} map[string]interface{} "Некорректные данные"
-// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
+// @Failure 400 {object} dto.ErrorResponse "Некорректные данные"
+// @Failure 500 {object} dto.ErrorResponse "Ошибка сервера"
 // @Security BearerAuth
 // @Router /v1/inventory_status [post]
 func (h *InventoryStatusHandler) CreateInventoryStatus(c *gin.Context) {
@@ -56,7 +56,7 @@ func (h *InventoryStatusHandler) CreateInventoryStatus(c *gin.Context) {
 // @Produce json
 // @Param id path int true "ID статуса"
 // @Success 200 {object} map[string]interface{} "Информация о статусе"
-// @Failure 400 {object} map[string]interface{} "Некорректный ID"
+// @Failure 400 {object} dto.ErrorResponse "Некорректный ID"
 // @Failure 404 {object} map[string]interface{} "Статус не найден"
 // @Security BearerAuth
 // @Router /v1/inventory_status/{id} [get]
@@ -82,7 +82,7 @@ func (h *InventoryStatusHandler) GetInventoryStatusByID(c *gin.Context) {
 // @Tags v1/inventory_status
 // @Produce json
 // @Success 200 {array} models.InventoryStatus "Список статусов"
-// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
+// @Failure 500 {object} dto.ErrorResponse "Ошибка сервера"
 // @Security BearerAuth
 // @Router /v1/inventory_status [get]
 func (h *InventoryStatusHandler) GetAllInventoryStatuses(c *gin.Context) {
@@ -104,8 +104,8 @@ func (h *InventoryStatusHandler) GetAllInventoryStatuses(c *gin.Context) {
 // @Param id path int true "ID статуса"
 // @Param status body dto.InventoryStatusDTO true "Информация для обновления"
 // @Success 200 {object} map[string]interface{} "Обновленный статус"
-// @Failure 400 {object} map[string]interface{} "Некорректный ID или данные"
-// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
+// @Failure 400 {object} dto.ErrorResponse "Некорректный ID или данные"
+// @Failure 500 {object} dto.ErrorResponse "Ошибка сервера"
 // @Security BearerAuth
 // @Router /v1/inventory_status/{id} [put]
 func (h *InventoryStatusHandler) UpdateInventoryStatus(c *gin.Context) {
@@ -138,8 +138,8 @@ func (h *InventoryStatusHandler) UpdateInventoryStatus(c *gin.Context) {
 // @Produce json
 // @Param id path int true "ID статуса"
 // @Success 200 {object} map[string]interface{} "Сообщение об успешном удалении"
-// @Failure 400 {object} map[string]interface{} "Некорректный ID"
-// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
+// @Failure 400 {object} dto.ErrorResponse "Некорректный ID"
+// @Failure 500 {object} dto.ErrorResponse "Ошибка сервера"
 // @Security BearerAuth
 // @Router /v1/inventory_status/{id} [delete]
 func (h *InventoryStatusHandler) DeleteInventoryStatus(c *gin.Context) {

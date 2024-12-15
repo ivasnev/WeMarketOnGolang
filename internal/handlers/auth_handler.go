@@ -26,7 +26,7 @@ func NewAuthHandler(authService *services.JWTAuthService) *AuthHandler {
 // @Produce json
 // @Param credentials body dto.LoginRequest true "Учетные данные пользователя"
 // @Success 200 {object} dto.LoginResponse "JWT токен"
-// @Failure 400 {object} map[string]interface{} "Неверные данные"
+// @Failure 400 {object} dto.ErrorResponse "Неверные данные"
 // @Failure 401 {object} map[string]interface{} "Ошибка авторизации"
 // @Router /v1/auth/jwt/login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
@@ -71,7 +71,7 @@ func (h *AuthHandler) getUserIdFromContext(c *gin.Context) (int32, error) {
 // @Produce json
 // @Success 200 {object} map[string]interface{} "Успешный выход"
 // @Failure 401 {object} map[string]interface{} "Ошибка аутентификации"
-// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
+// @Failure 500 {object} dto.ErrorResponse "Ошибка сервера"
 // @Security BearerAuth
 // @Router /v1/auth/jwt/logout [post]
 func (h *AuthHandler) Logout(c *gin.Context) {

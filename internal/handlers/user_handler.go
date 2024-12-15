@@ -41,8 +41,8 @@ func (h *UserHandler) getUserIdFromContext(c *gin.Context) (int32, error) {
 // @Produce json
 // @Param user body dto.CreateUserDTO true "Данные пользователя"
 // @Success 201 {object} map[string]interface{} "Успешная регистрация"
-// @Failure 400 {object} map[string]interface{} "Ошибка ввода"
-// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
+// @Failure 400 {object} dto.ErrorResponse "Ошибка ввода"
+// @Failure 500 {object} dto.ErrorResponse "Ошибка сервера"
 // @Router /v1/auth/register [post]
 func (h *UserHandler) Register(c *gin.Context) {
 	var request dto.CreateUserDTO
@@ -117,8 +117,8 @@ func (h *UserHandler) GetCurrentUser(c *gin.Context) {
 // @Produce json
 // @Param user body dto.UpdateUserDTO true "Обновляемые данные пользователя"
 // @Success 200 {object} map[string]interface{} "Успешное обновление"
-// @Failure 400 {object} map[string]interface{} "Ошибка ввода"
-// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
+// @Failure 400 {object} dto.ErrorResponse "Ошибка ввода"
+// @Failure 500 {object} dto.ErrorResponse "Ошибка сервера"
 // @Security BearerAuth
 // @Router /v1/users/me [patch]
 func (h *UserHandler) UpdateCurrentUser(c *gin.Context) {
@@ -165,7 +165,7 @@ func (h *UserHandler) UpdateCurrentUser(c *gin.Context) {
 // @Produce json
 // @Param id path int true "ID пользователя"
 // @Success 200 {object} dto.UserResponseDTO "Данные пользователя"
-// @Failure 400 {object} map[string]interface{} "Некорректный ID"
+// @Failure 400 {object} dto.ErrorResponse "Некорректный ID"
 // @Failure 404 {object} map[string]interface{} "Пользователь не найден"
 // @Security BearerAuth
 // @Router /v1/users/{id} [get]

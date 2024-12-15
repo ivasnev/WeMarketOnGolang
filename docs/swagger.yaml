@@ -71,6 +71,15 @@ definitions:
     - password
     - phone
     type: object
+  dto.ErrorResponse:
+    properties:
+      code:
+        type: integer
+      error:
+        type: string
+      message:
+        type: string
+    type: object
   dto.InventoryStatusDTO:
     properties:
       name:
@@ -258,8 +267,7 @@ paths:
         "400":
           description: Неверные данные
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
         "401":
           description: Ошибка авторизации
           schema:
@@ -287,8 +295,7 @@ paths:
         "500":
           description: Ошибка сервера
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Выход пользователя
@@ -317,13 +324,11 @@ paths:
         "400":
           description: Ошибка ввода
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Ошибка сервера
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
       summary: Регистрация пользователя
       tags:
       - v1/auth
@@ -342,8 +347,7 @@ paths:
         "500":
           description: Ошибка сервера
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Получение списка категорий
@@ -370,13 +374,11 @@ paths:
         "400":
           description: Ошибка валидации входных данных
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Ошибка сервера
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Создание категории
@@ -402,13 +404,11 @@ paths:
         "400":
           description: Некорректный ID категории
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Ошибка сервера
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Удаление категории
@@ -432,8 +432,7 @@ paths:
         "400":
           description: Некорректный ID категории
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
         "404":
           description: Категория не найдена
           schema:
@@ -470,13 +469,11 @@ paths:
         "400":
           description: Некорректный ID категории или ошибка валидации
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Ошибка сервера
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Обновление категории
@@ -497,8 +494,7 @@ paths:
         "500":
           description: Ошибка сервера
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Получить все инвентарные статусы
@@ -526,13 +522,11 @@ paths:
         "400":
           description: Некорректные данные
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Ошибка сервера
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Создать инвентарный статус
@@ -558,13 +552,11 @@ paths:
         "400":
           description: Некорректный ID
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Ошибка сервера
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Удалить инвентарный статус
@@ -589,8 +581,7 @@ paths:
         "400":
           description: Некорректный ID
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
         "404":
           description: Статус не найден
           schema:
@@ -628,13 +619,11 @@ paths:
         "400":
           description: Некорректный ID или данные
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Ошибка сервера
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Обновить инвентарный статус
@@ -681,8 +670,7 @@ paths:
         "500":
           description: Ошибка сервера
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Получить все продукты
@@ -709,13 +697,11 @@ paths:
         "400":
           description: Неверные данные
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Ошибка сервера
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Создать продукт
@@ -743,13 +729,11 @@ paths:
         "400":
           description: Неверный ID
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Ошибка сервера
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Удалить продукт
@@ -775,8 +759,7 @@ paths:
         "400":
           description: Неверный ID
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
         "404":
           description: Продукт не найден
           schema:
@@ -814,13 +797,11 @@ paths:
         "400":
           description: Неверный ID или данные
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Ошибка сервера
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Обновить продукт
@@ -869,8 +850,7 @@ paths:
         "500":
           description: Ошибка сервера
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Удалить задачу
@@ -918,8 +898,7 @@ paths:
         "500":
           description: Ошибка сервера
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Создать задачу (классическая операция)
@@ -940,8 +919,7 @@ paths:
         "500":
           description: Ошибка сервера
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Создать задачу (бесконечная операция)
@@ -966,8 +944,7 @@ paths:
         "400":
           description: Некорректный ID
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
         "404":
           description: Пользователь не найден
           schema:
@@ -1020,13 +997,11 @@ paths:
         "400":
           description: Ошибка ввода
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Ошибка сервера
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Обновить текущего пользователя

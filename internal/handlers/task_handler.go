@@ -22,7 +22,7 @@ func NewTaskHandler(service *tasks.TaskService) *TaskHandler {
 // @Accept json
 // @Produce json
 // @Success 201 {object} string "Созданная задача"
-// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
+// @Failure 500 {object} dto.ErrorResponse "Ошибка сервера"
 // @Security BearerAuth
 // @Router /v1/tasks/inf [post]
 func (h *TaskHandler) CreateTaskInf(c *gin.Context) {
@@ -42,7 +42,7 @@ func (h *TaskHandler) CreateTaskInf(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Success 201 {object} string "Созданная задача"
-// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
+// @Failure 500 {object} dto.ErrorResponse "Ошибка сервера"
 // @Security BearerAuth
 // @Router /v1/tasks/classic [post]
 func (h *TaskHandler) CreateTaskClassic(c *gin.Context) {
@@ -106,7 +106,7 @@ func (h *TaskHandler) GetTask(c *gin.Context) {
 // @Produce json
 // @Param id path string true "ID задачи"
 // @Success 200 {object} map[string]interface{} "Задача успешно удалена"
-// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
+// @Failure 500 {object} dto.ErrorResponse "Ошибка сервера"
 // @Security BearerAuth
 // @Router /v1/tasks/{id} [delete]
 func (h *TaskHandler) CancelTask(c *gin.Context) {

@@ -1,7 +1,7 @@
 package dto
 
 type ErrorResponse struct {
-	error   string
-	message string
-	code    int
+	Error   string `json:"error"`
+	Message string `json:"message"`
+	Code    int    `json:"code"`
 }
