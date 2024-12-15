@@ -1,0 +1,1040 @@
+basePath: /
+definitions:
+  dto.CategoryResponse:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      parent_category_id:
+        type: integer
+    type: object
+  dto.CreateCategoryRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      parent_category_id:
+        type: integer
+    required:
+    - name
+    type: object
+  dto.CreateProductDTO:
+    properties:
+      availability_status:
+        type: integer
+      category_id:
+        type: integer
+      description:
+        type: string
+      image_url:
+        type: string
+      manufacturer_id:
+        type: integer
+      name:
+        type: string
+      price:
+        type: number
+      sku:
+        type: string
+      stock:
+        type: integer
+      weight:
+        type: number
+    required:
+    - availability_status
+    - category_id
+    - name
+    - price
+    - stock
+    type: object
+  dto.CreateUserDTO:
+    properties:
+      address:
+        type: string
+      email:
+        example: string@gmail.com
+        type: string
+      name:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      phone:
+        type: string
+    required:
+    - email
+    - name
+    - password
+    - phone
+    type: object
+  dto.InventoryStatusDTO:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  dto.LoginRequest:
+    properties:
+      email:
+        example: string@gmail.com
+        type: string
+      password:
+        type: string
+    type: object
+  dto.LoginResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  dto.ProductResponseDTO:
+    properties:
+      added_date:
+        type: string
+      availability_status:
+        type: integer
+      category_id:
+        type: integer
+      description:
+        type: string
+      id:
+        type: integer
+      image_url:
+        type: string
+      manufacturer_id:
+        type: integer
+      name:
+        type: string
+      price:
+        type: number
+      sku:
+        type: string
+      stock:
+        type: integer
+      weight:
+        type: number
+    type: object
+  dto.ProductResponseDTOWithPagination:
+    properties:
+      page:
+        type: integer
+      page_size:
+        type: integer
+      products:
+        items:
+          $ref: '#/definitions/dto.ProductResponseDTO'
+        type: array
+      total:
+        type: integer
+    type: object
+  dto.TaskResponse:
+    properties:
+      description:
+        type: string
+      error: {}
+      id:
+        type: string
+      progress:
+        type: integer
+      status:
+        $ref: '#/definitions/dto.TaskStatus'
+    type: object
+  dto.TaskStatus:
+    enum:
+    - Pending
+    - Running
+    - Success
+    - Failed
+    - Canceled
+    type: string
+    x-enum-varnames:
+    - StatusPending
+    - StatusRunning
+    - StatusSuccess
+    - StatusFailed
+    - StatusCanceled
+  dto.UpdateCategoryRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      parent_category_id:
+        type: integer
+    type: object
+  dto.UpdateProductDTO:
+    properties:
+      availability_status:
+        type: integer
+      category_id:
+        type: integer
+      description:
+        type: string
+      image_url:
+        type: string
+      manufacturer_id:
+        type: integer
+      name:
+        type: string
+      price:
+        type: number
+      sku:
+        type: string
+      stock:
+        type: integer
+      weight:
+        type: number
+    type: object
+  dto.UpdateUserDTO:
+    properties:
+      address:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+    type: object
+  dto.UserResponseDTO:
+    properties:
+      address:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      phone:
+        type: string
+      role_id:
+        type: integer
+    type: object
+  models.InventoryStatus:
+    properties:
+      id:
+        description: ID статуса
+        type: integer
+      name:
+        description: Название статуса
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a sample server celler server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: WeMarket API
+  version: "1.0"
+paths:
+  /v1/auth/jwt/login:
+    post:
+      consumes:
+      - application/json
+      description: Принимает логин и пароль, возвращает JWT токен
+      parameters:
+      - description: Учетные данные пользователя
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: JWT токен
+          schema:
+            $ref: '#/definitions/dto.LoginResponse'
+        "400":
+          description: Неверные данные
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Ошибка авторизации
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Авторизация пользователя
+      tags:
+      - v1/auth
+  /v1/auth/jwt/logout:
+    post:
+      description: Завершение сессии пользователя
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный выход
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Ошибка аутентификации
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Ошибка сервера
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Выход пользователя
+      tags:
+      - v1/auth
+  /v1/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Создает нового пользователя с указанными данными
+      parameters:
+      - description: Данные пользователя
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateUserDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Успешная регистрация
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Ошибка ввода
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Ошибка сервера
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Регистрация пользователя
+      tags:
+      - v1/auth
+  /v1/category:
+    get:
+      description: Возвращает список всех категорий.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список категорий
+          schema:
+            items:
+              $ref: '#/definitions/dto.CategoryResponse'
+            type: array
+        "500":
+          description: Ошибка сервера
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получение списка категорий
+      tags:
+      - v1/categories
+    post:
+      consumes:
+      - application/json
+      description: Создает новую категорию на основе предоставленных данных.
+      parameters:
+      - description: Данные для создания категории
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Созданная категория
+          schema:
+            $ref: '#/definitions/dto.CategoryResponse'
+        "400":
+          description: Ошибка валидации входных данных
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Ошибка сервера
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Создание категории
+      tags:
+      - v1/categories
+  /v1/category/{id}:
+    delete:
+      description: Удаляет категорию по её идентификатору.
+      parameters:
+      - description: ID категории
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Сообщение об успешном удалении
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Некорректный ID категории
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Ошибка сервера
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Удаление категории
+      tags:
+      - v1/categories
+    get:
+      description: Возвращает категорию по её идентификатору.
+      parameters:
+      - description: ID категории
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Найденная категория
+          schema:
+            $ref: '#/definitions/dto.CategoryResponse'
+        "400":
+          description: Некорректный ID категории
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Категория не найдена
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получение категории по ID
+      tags:
+      - v1/categories
+    put:
+      consumes:
+      - application/json
+      description: Обновляет данные существующей категории.
+      parameters:
+      - description: ID категории
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления категории
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Обновленная категория
+          schema:
+            $ref: '#/definitions/dto.CategoryResponse'
+        "400":
+          description: Некорректный ID категории или ошибка валидации
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Ошибка сервера
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Обновление категории
+      tags:
+      - v1/categories
+  /v1/inventory_status:
+    get:
+      description: Возвращает список всех инвентарных статусов.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список статусов
+          schema:
+            items:
+              $ref: '#/definitions/models.InventoryStatus'
+            type: array
+        "500":
+          description: Ошибка сервера
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить все инвентарные статусы
+      tags:
+      - v1/inventory_status
+    post:
+      consumes:
+      - application/json
+      description: Создает новый инвентарный статус.
+      parameters:
+      - description: Информация о статусе
+        in: body
+        name: status
+        required: true
+        schema:
+          $ref: '#/definitions/dto.InventoryStatusDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Созданный статус
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Некорректные данные
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Ошибка сервера
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Создать инвентарный статус
+      tags:
+      - v1/inventory_status
+  /v1/inventory_status/{id}:
+    delete:
+      description: Удаляет существующий инвентарный статус по ID.
+      parameters:
+      - description: ID статуса
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Сообщение об успешном удалении
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Некорректный ID
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Ошибка сервера
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Удалить инвентарный статус
+      tags:
+      - v1/inventory_status
+    get:
+      description: Возвращает инвентарный статус по ID.
+      parameters:
+      - description: ID статуса
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Информация о статусе
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Некорректный ID
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Статус не найден
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить инвентарный статус
+      tags:
+      - v1/inventory_status
+    put:
+      consumes:
+      - application/json
+      description: Обновляет данные существующего инвентарного статуса.
+      parameters:
+      - description: ID статуса
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Информация для обновления
+        in: body
+        name: status
+        required: true
+        schema:
+          $ref: '#/definitions/dto.InventoryStatusDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Обновленный статус
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Некорректный ID или данные
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Ошибка сервера
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Обновить инвентарный статус
+      tags:
+      - v1/inventory_status
+  /v1/products:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список всех продуктов с поддержкой фильтрации и пагинации
+      parameters:
+      - description: Номер страницы
+        in: query
+        name: page
+        type: integer
+      - description: Размер страницы
+        in: query
+        name: page_size
+        type: integer
+      - description: Название продукта
+        in: query
+        name: name
+        type: string
+      - description: Минимальная цена
+        in: query
+        name: min_price
+        type: number
+      - description: Максимальная цена
+        in: query
+        name: max_price
+        type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ProductResponseDTOWithPagination'
+        "422":
+          description: Ошибка валидации
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Ошибка сервера
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить все продукты
+      tags:
+      - v1/products
+    post:
+      consumes:
+      - application/json
+      description: Создает новый продукт на основе предоставленных данных
+      parameters:
+      - description: Данные продукта
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateProductDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.ProductResponseDTO'
+        "400":
+          description: Неверные данные
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Ошибка сервера
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Создать продукт
+      tags:
+      - v1/products
+  /v1/products/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет продукт по его идентификатору
+      parameters:
+      - description: ID продукта
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Продукт успешно удален
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Неверный ID
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Ошибка сервера
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Удалить продукт
+      tags:
+      - v1/products
+    get:
+      consumes:
+      - application/json
+      description: Возвращает продукт на основе переданного идентификатора
+      parameters:
+      - description: ID продукта
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ProductResponseDTO'
+        "400":
+          description: Неверный ID
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Продукт не найден
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить продукт по ID
+      tags:
+      - v1/products
+    put:
+      consumes:
+      - application/json
+      description: Обновляет данные продукта на основе переданных данных
+      parameters:
+      - description: ID продукта
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления продукта
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateProductDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Продукт успешно обновлен
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Неверный ID или данные
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Ошибка сервера
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Обновить продукт
+      tags:
+      - v1/products
+  /v1/tasks:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список всех активных задач
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список задач
+          schema:
+            items:
+              items:
+                $ref: '#/definitions/dto.TaskResponse'
+              type: array
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Получить все задачи
+      tags:
+      - v1/tasks
+  /v1/tasks/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет задачу по ее идентификатору
+      parameters:
+      - description: ID задачи
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Задача успешно удалена
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Ошибка сервера
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Удалить задачу
+      tags:
+      - v1/tasks
+    get:
+      consumes:
+      - application/json
+      description: Возвращает задачу на основе переданного идентификатора
+      parameters:
+      - description: ID задачи
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные задачи
+          schema:
+            $ref: '#/definitions/dto.TaskResponse'
+        "404":
+          description: Задача не найдена
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить задачу по ID
+      tags:
+      - v1/tasks
+  /v1/tasks/classic:
+    post:
+      consumes:
+      - application/json
+      description: Создает новую задачу, выполняющую классическую операцию
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Созданная задача
+          schema:
+            type: string
+        "500":
+          description: Ошибка сервера
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Создать задачу (классическая операция)
+      tags:
+      - v1/tasks
+  /v1/tasks/inf:
+    post:
+      consumes:
+      - application/json
+      description: Создает новую задачу, выполняющую бесконечную операцию
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Созданная задача
+          schema:
+            type: string
+        "500":
+          description: Ошибка сервера
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Создать задачу (бесконечная операция)
+      tags:
+      - v1/tasks
+  /v1/users/{id}:
+    get:
+      description: Возвращает данные пользователя на основе идентификатора
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные пользователя
+          schema:
+            $ref: '#/definitions/dto.UserResponseDTO'
+        "400":
+          description: Некорректный ID
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Пользователь не найден
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить пользователя по ID
+      tags:
+      - v1/users
+  /v1/users/me:
+    get:
+      description: Возвращает данные текущего авторизованного пользователя
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные пользователя
+          schema:
+            $ref: '#/definitions/dto.UserResponseDTO'
+        "401":
+          description: Пользователь не авторизован
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить текущего пользователя
+      tags:
+      - v1/users
+    patch:
+      consumes:
+      - application/json
+      description: Обновляет данные текущего авторизованного пользователя
+      parameters:
+      - description: Обновляемые данные пользователя
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateUserDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешное обновление
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Ошибка ввода
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Ошибка сервера
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Обновить текущего пользователя
+      tags:
+      - v1/users
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

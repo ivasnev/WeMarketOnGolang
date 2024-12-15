@@ -1,41 +1,49 @@
 package pkg
 
 import (
-	"gopkg.in/yaml.v3"
-	"io/ioutil"
+	"github.com/spf13/viper"
 	"log"
 )
 
-// Config содержит параметры конфигурации.
+// Config структура конфигурации
 type Config struct {
 	Server struct {
 		Port string `mapstructure:"port"`
-	} `yaml:"server"`
+	} `mapstructure:"server"`
 	DB struct {
-		User     string `yaml:"user"`
-		Password string `yaml:"password"`
-		Name     string `yaml:"name"`
-		Host     string `yaml:"host"`
-		Port     string `yaml:"port"`
-	} `yaml:"db"`
+		User     string `mapstructure:"user"`
+		Password string `mapstructure:"password"`
+		Name     string `mapstructure:"name"`
+		Host     string `mapstructure:"host"`
+		Port     string `mapstructure:"port"`
+	} `mapstructure:"db"`
 }
 
-// LoadConfig загружает конфигурацию из файла.
-func LoadConfig(filePath string) (*Config, error) {
+// LoadConfig загружает конфигурацию из файла и окружения
+func LoadConfig(path string) (*Config, error) {
+	// Установить автоматическое считывание переменных окружения
+	viper.SetEnvPrefix("WEMARKET") // Префикс для переменных окружения
+	viper.AutomaticEnv()           // Автоматически брать переменные из окружения
+
+	// Привязка ключей к переменным окружения
+	_ = viper.BindEnv("server.port", "WEMARKET_SERVER_PORT")
+	_ = viper.BindEnv("db.user", "WEMARKET_DB_USER")
+	_ = viper.BindEnv("db.password", "WEMARKET_DB_PASSWORD")
+	_ = viper.BindEnv("db.name", "WEMARKET_DB_NAME")
+	_ = viper.BindEnv("db.host", "WEMARKET_DB_HOST")
+	_ = viper.BindEnv("db.port", "WEMARKET_DB_PORT")
+
+	// Чтение файла конфигурации
+	viper.SetConfigFile(path)
+	if err := viper.ReadInConfig(); err != nil {
+		log.Printf("Ошибка чтения конфигурации из файла: %v", err)
+	}
+
+	// Заполнение структуры конфигурации
 	var config Config
-
-	data, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		log.Fatalf("Ошибка чтения файла конфигурации: %v", err)
+	if err := viper.Unmarshal(&config); err != nil {
 		return nil, err
 	}
-
-	err = yaml.Unmarshal(data, &config)
-	if err != nil {
-		log.Fatalf("Ошибка парсинга конфигурации: %v", err)
-		return nil, err
-	}
-
 	return &config, nil
 }
 

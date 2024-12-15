@@ -3,21 +3,35 @@ package handlers
 import (
 	"WeMarketOnGolang/internal/dto"
 	"WeMarketOnGolang/internal/services/categories"
+	"WeMarketOnGolang/internal/utils"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
+// CategoryHandler обрабатывает запросы, связанные с категориями.
 type CategoryHandler struct {
 	service *categories.CategoryService
 }
 
+// NewCategoryHandler создает новый CategoryHandler.
 func NewCategoryHandler(service *categories.CategoryService) *CategoryHandler {
 	return &CategoryHandler{service: service}
 }
 
-// CreateCategory создает новую категорию
+// CreateCategory создает новую категорию.
+// @Summary Создание категории
+// @Description Создает новую категорию на основе предоставленных данных.
+// @Tags v1/categories
+// @Accept json
+// @Produce json
+// @Param category body dto.CreateCategoryRequest true "Данные для создания категории"
+// @Success 201 {object} dto.CategoryResponse "Созданная категория"
+// @Failure 400 {object} map[string]interface{} "Ошибка валидации входных данных"
+// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
+// @Security BearerAuth
+// @Router /v1/category [post]
 func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 	var req dto.CreateCategoryRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -27,14 +41,25 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 
 	category, err := h.service.CreateCategory(req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create category"})
+		statusCode, response := utils.HandleDBError(err)
+		c.JSON(statusCode, response)
 		return
 	}
 
 	c.JSON(http.StatusCreated, category)
 }
 
-// GetCategory возвращает категорию по ID
+// GetCategory возвращает категорию по ID.
+// @Summary Получение категории по ID
+// @Description Возвращает категорию по её идентификатору.
+// @Tags v1/categories
+// @Produce json
+// @Param id path int true "ID категории"
+// @Success 200 {object} dto.CategoryResponse "Найденная категория"
+// @Failure 400 {object} map[string]interface{} "Некорректный ID категории"
+// @Failure 404 {object} map[string]interface{} "Категория не найдена"
+// @Security BearerAuth
+// @Router /v1/category/{id} [get]
 func (h *CategoryHandler) GetCategory(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -51,18 +76,38 @@ func (h *CategoryHandler) GetCategory(c *gin.Context) {
 	c.JSON(http.StatusOK, category)
 }
 
-// GetAllCategories возвращает список всех категорий
+// GetAllCategories возвращает список всех категорий.
+// @Summary Получение списка категорий
+// @Description Возвращает список всех категорий.
+// @Tags v1/categories
+// @Produce json
+// @Success 200 {array} dto.CategoryResponse "Список категорий"
+// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
+// @Security BearerAuth
+// @Router /v1/category [get]
 func (h *CategoryHandler) GetAllCategories(c *gin.Context) {
-	categories, err := h.service.GetAllCategories()
+	categoriesList, err := h.service.GetAllCategories()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve categories"})
 		return
 	}
 
-	c.JSON(http.StatusOK, categories)
+	c.JSON(http.StatusOK, categoriesList)
 }
 
-// UpdateCategory обновляет информацию о категории
+// UpdateCategory обновляет информацию о категории.
+// @Summary Обновление категории
+// @Description Обновляет данные существующей категории.
+// @Tags v1/categories
+// @Accept json
+// @Produce json
+// @Param id path int true "ID категории"
+// @Param category body dto.UpdateCategoryRequest true "Данные для обновления категории"
+// @Success 200 {object} dto.CategoryResponse "Обновленная категория"
+// @Failure 400 {object} map[string]interface{} "Некорректный ID категории или ошибка валидации"
+// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
+// @Security BearerAuth
+// @Router /v1/category/{id} [put]
 func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -78,14 +123,25 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 
 	updatedCategory, err := h.service.UpdateCategory(id, req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update category"})
+		statusCode, response := utils.HandleDBError(err)
+		c.JSON(statusCode, response)
 		return
 	}
 
 	c.JSON(http.StatusOK, updatedCategory)
 }
 
-// DeleteCategory удаляет категорию по ID
+// DeleteCategory удаляет категорию по ID.
+// @Summary Удаление категории
+// @Description Удаляет категорию по её идентификатору.
+// @Tags v1/categories
+// @Produce json
+// @Param id path int true "ID категории"
+// @Success 200 {object} map[string]interface{} "Сообщение об успешном удалении"
+// @Failure 400 {object} map[string]interface{} "Некорректный ID категории"
+// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
+// @Security BearerAuth
+// @Router /v1/category/{id} [delete]
 func (h *CategoryHandler) DeleteCategory(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -94,7 +150,8 @@ func (h *CategoryHandler) DeleteCategory(c *gin.Context) {
 	}
 
 	if err := h.service.DeleteCategory(id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete category"})
+		statusCode, response := utils.HandleDBError(err)
+		c.JSON(statusCode, response)
 		return
 	}
 

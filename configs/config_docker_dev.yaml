@@ -1,4 +1,4 @@
-# configs/config.yaml
+# configs/config_local_dev.yaml
 server:
   port: "8080"
 
@@ -6,5 +6,5 @@ db:
   user: "postgres"
   password: "postgres"
   name: "wemarket"
-  host: "localhost"
+  host: "0.0.0.0"
   port: "5432"

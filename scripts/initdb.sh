@@ -4,7 +4,7 @@
 DB_USER="postgres"
 DB_PASSWORD="postgres"
 DB_NAME="wemarket"
-DB_HOST="localhost"
+DB_HOST="0.0.0.0"
 DB_PORT="5432"
 
 # Проверка наличия флагов

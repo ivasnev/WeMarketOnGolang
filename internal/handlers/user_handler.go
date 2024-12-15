@@ -4,6 +4,7 @@ import (
 	"WeMarketOnGolang/internal/dto"
 	"WeMarketOnGolang/internal/models"
 	"WeMarketOnGolang/internal/services"
+	"WeMarketOnGolang/internal/utils"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -25,7 +26,6 @@ func (h *UserHandler) getUserIdFromContext(c *gin.Context) (int32, error) {
 		return 0, errors.New("No userID found in context")
 	}
 
-	// Преобразуем userID в int32
 	userIDInt, err := strconv.Atoi(userID.(string)) // преобразуем строку в int
 	if err != nil {
 		return 0, errors.New("Invalid userID")
@@ -33,6 +33,17 @@ func (h *UserHandler) getUserIdFromContext(c *gin.Context) (int32, error) {
 	return int32(userIDInt), nil
 }
 
+// Register регистрирует нового пользователя
+// @Summary Регистрация пользователя
+// @Description Создает нового пользователя с указанными данными
+// @Tags v1/auth
+// @Accept json
+// @Produce json
+// @Param user body dto.CreateUserDTO true "Данные пользователя"
+// @Success 201 {object} map[string]interface{} "Успешная регистрация"
+// @Failure 400 {object} map[string]interface{} "Ошибка ввода"
+// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
+// @Router /v1/auth/register [post]
 func (h *UserHandler) Register(c *gin.Context) {
 	var request dto.CreateUserDTO
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -40,7 +51,6 @@ func (h *UserHandler) Register(c *gin.Context) {
 		return
 	}
 
-	// Хешируем пароль перед сохранением
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -53,17 +63,27 @@ func (h *UserHandler) Register(c *gin.Context) {
 		Name:         request.Name,
 		Phone:        request.Phone,
 		Address:      request.Address,
-		RoleID:       1, // Роль по умолчанию
+		RoleID:       1,
 	}
 
 	if err := h.userService.CreateUser(&user); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating user"})
+		statusCode, response := utils.HandleDBError(err)
+		c.JSON(statusCode, response)
 		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"message": "User registered successfully"})
 }
 
+// GetCurrentUser возвращает текущего пользователя
+// @Summary Получить текущего пользователя
+// @Description Возвращает данные текущего авторизованного пользователя
+// @Tags v1/users
+// @Produce json
+// @Success 200 {object} dto.UserResponseDTO "Данные пользователя"
+// @Failure 401 {object} map[string]interface{} "Пользователь не авторизован"
+// @Security BearerAuth
+// @Router /v1/users/me [get]
 func (h *UserHandler) GetCurrentUser(c *gin.Context) {
 	userID, err := h.getUserIdFromContext(c)
 	if err != nil {
@@ -89,6 +109,18 @@ func (h *UserHandler) GetCurrentUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"user": response})
 }
 
+// UpdateCurrentUser обновляет данные текущего пользователя
+// @Summary Обновить текущего пользователя
+// @Description Обновляет данные текущего авторизованного пользователя
+// @Tags v1/users
+// @Accept json
+// @Produce json
+// @Param user body dto.UpdateUserDTO true "Обновляемые данные пользователя"
+// @Success 200 {object} map[string]interface{} "Успешное обновление"
+// @Failure 400 {object} map[string]interface{} "Ошибка ввода"
+// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
+// @Security BearerAuth
+// @Router /v1/users/me [patch]
 func (h *UserHandler) UpdateCurrentUser(c *gin.Context) {
 	userID, err := h.getUserIdFromContext(c)
 	if err != nil {
@@ -108,7 +140,6 @@ func (h *UserHandler) UpdateCurrentUser(c *gin.Context) {
 		return
 	}
 
-	// Обновление только тех полей, которые переданы в запросе
 	if request.Name != nil {
 		user.Name = *request.Name
 	}
@@ -127,6 +158,17 @@ func (h *UserHandler) UpdateCurrentUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "User updated successfully"})
 }
 
+// GetUserByID возвращает пользователя по ID
+// @Summary Получить пользователя по ID
+// @Description Возвращает данные пользователя на основе идентификатора
+// @Tags v1/users
+// @Produce json
+// @Param id path int true "ID пользователя"
+// @Success 200 {object} dto.UserResponseDTO "Данные пользователя"
+// @Failure 400 {object} map[string]interface{} "Некорректный ID"
+// @Failure 404 {object} map[string]interface{} "Пользователь не найден"
+// @Security BearerAuth
+// @Router /v1/users/{id} [get]
 func (h *UserHandler) GetUserByID(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {

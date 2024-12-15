@@ -1,7 +1,7 @@
 package dto
 
 type LoginRequest struct {
-	Email    string `json:"email"`
+	Email    string `json:"email" example:"string@gmail.com"`
 	Password string `json:"password"`
 }
 
@@ -12,7 +12,7 @@ type LoginResponse struct {
 type UserResponse struct {
 	ID    int32  `json:"id"`
 	Name  string `json:"name"`
-	Email string `json:"email"`
+	Email string `json:"email" example:"string@gmail.com"`
 	Role  string `json:"role"`
 }
 

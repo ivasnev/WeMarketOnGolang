@@ -4,6 +4,7 @@ import (
 	"WeMarketOnGolang/internal/dto"
 	"WeMarketOnGolang/internal/models"
 	"WeMarketOnGolang/internal/services/products"
+	"WeMarketOnGolang/internal/utils"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -19,6 +20,18 @@ func NewProductHandler(service products.ProductServiceInterface) *ProductHandler
 	return &ProductHandler{ProductService: service}
 }
 
+// CreateProduct создает новый продукт
+// @Summary Создать продукт
+// @Description Создает новый продукт на основе предоставленных данных
+// @Tags v1/products
+// @Accept json
+// @Produce json
+// @Param product body dto.CreateProductDTO true "Данные продукта"
+// @Success 201 {object} dto.ProductResponseDTO
+// @Failure 400 {object} map[string]interface{} "Неверные данные"
+// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
+// @Security BearerAuth
+// @Router /v1/products [post]
 func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	var dtoObj dto.CreateProductDTO
 	if err := c.ShouldBindJSON(&dtoObj); err != nil {
@@ -49,7 +62,8 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	}
 
 	if err := h.ProductService.CreateProduct(product); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create product"})
+		statusCode, response := utils.HandleDBError(err)
+		c.JSON(statusCode, response)
 		return
 	}
 
@@ -69,6 +83,18 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	})
 }
 
+// GetProductByID возвращает продукт по ID
+// @Summary Получить продукт по ID
+// @Description Возвращает продукт на основе переданного идентификатора
+// @Tags v1/products
+// @Accept json
+// @Produce json
+// @Param id path int true "ID продукта"
+// @Success 200 {object} dto.ProductResponseDTO
+// @Failure 400 {object} map[string]interface{} "Неверный ID"
+// @Failure 404 {object} map[string]interface{} "Продукт не найден"
+// @Security BearerAuth
+// @Router /v1/products/{id} [get]
 func (h *ProductHandler) GetProductByID(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -98,6 +124,22 @@ func (h *ProductHandler) GetProductByID(c *gin.Context) {
 	})
 }
 
+// GetAllProducts возвращает все продукты
+// @Summary Получить все продукты
+// @Description Возвращает список всех продуктов с поддержкой фильтрации и пагинации
+// @Tags v1/products
+// @Accept json
+// @Produce json
+// @Param page query int false "Номер страницы"
+// @Param page_size query int false "Размер страницы"
+// @Param name query string false "Название продукта"
+// @Param min_price query number false "Минимальная цена"
+// @Param max_price query number false "Максимальная цена"
+// @Success 200 {object} dto.ProductResponseDTOWithPagination
+// @Failure 422 {object} map[string]interface{} "Ошибка валидации"
+// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
+// @Security BearerAuth
+// @Router /v1/products [get]
 func (h *ProductHandler) GetAllProducts(c *gin.Context) {
 
 	filter := &dto.ProductFilter{}
@@ -153,6 +195,19 @@ func (h *ProductHandler) GetAllProducts(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+// UpdateProduct обновляет продукт
+// @Summary Обновить продукт
+// @Description Обновляет данные продукта на основе переданных данных
+// @Tags v1/products
+// @Accept json
+// @Produce json
+// @Param id path int true "ID продукта"
+// @Param product body dto.UpdateProductDTO true "Данные для обновления продукта"
+// @Success 200 {object} map[string]interface{} "Продукт успешно обновлен"
+// @Failure 400 {object} map[string]interface{} "Неверный ID или данные"
+// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
+// @Security BearerAuth
+// @Router /v1/products/{id} [put]
 func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -200,13 +255,26 @@ func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 	}
 
 	if err := h.ProductService.UpdateProduct(int32(id), &product); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update product"})
+		statusCode, response := utils.HandleDBError(err)
+		c.JSON(statusCode, response)
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Product updated successfully"})
 }
 
+// DeleteProduct удаляет продукт
+// @Summary Удалить продукт
+// @Description Удаляет продукт по его идентификатору
+// @Tags v1/products
+// @Accept json
+// @Produce json
+// @Param id path int true "ID продукта"
+// @Success 200 {object} map[string]interface{} "Продукт успешно удален"
+// @Failure 400 {object} map[string]interface{} "Неверный ID"
+// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
+// @Security BearerAuth
+// @Router /v1/products/{id} [delete]
 func (h *ProductHandler) DeleteProduct(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -215,7 +283,8 @@ func (h *ProductHandler) DeleteProduct(c *gin.Context) {
 	}
 
 	if err := h.ProductService.DeleteProduct(int32(id)); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete product"})
+		statusCode, response := utils.HandleDBError(err)
+		c.JSON(statusCode, response)
 		return
 	}
 

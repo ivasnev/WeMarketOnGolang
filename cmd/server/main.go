@@ -6,15 +6,35 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"log"
+	"os"
+	"time"
 )
 
+// @title           WeMarket API
+// @version         1.0
+// @description     This is a sample server celler server.
+// @termsOfService  http://swagger.io/terms/
+// @contact.name   API Support
+// @contact.url    http://www.swagger.io/support
+// @contact.email  support@swagger.io
+// @license.name  Apache 2.0
+// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+// @host      localhost:8080
+// @BasePath  /
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @tokenUrl /v1/auth/jwt/login
+// @externalDocs.description  OpenAPI
+// @externalDocs.url          https://swagger.io/resources/open-api/
 func main() {
 	// Инициализация логгера
 	pkg.InitLogger()
 
 	// Загрузка конфигурации
-	config, err := pkg.LoadConfig("configs/config.yaml")
+	config, err := pkg.LoadConfig("configs/config_local_dev.yaml")
 	if err != nil {
 		pkg.Error("Не удалось загрузить конфигурацию")
 		return
@@ -22,8 +42,20 @@ func main() {
 
 	databaseURL := pkg.GetDBUrl(config)
 
+	newDBLogger := logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags), // Вывод логов в консоль
+		logger.Config{
+			SlowThreshold:             time.Second, // Порог "медленного" запроса
+			LogLevel:                  logger.Info, // Уровень логирования
+			IgnoreRecordNotFoundError: true,        // Игнорировать ошибки RecordNotFound
+			Colorful:                  true,        // Цветные логи (для консоли)
+		},
+	)
+
 	// Инициализация базы данных
-	db, err := gorm.Open(postgres.Open(databaseURL), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(databaseURL), &gorm.Config{
+		Logger: newDBLogger,
+	})
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}

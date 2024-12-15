@@ -18,7 +18,17 @@ func NewAuthHandler(authService *services.JWTAuthService) *AuthHandler {
 	return &AuthHandler{authService: authService}
 }
 
-// Хендлер для логина с сессией
+// Login
+// @Summary Авторизация пользователя
+// @Description Принимает логин и пароль, возвращает JWT токен
+// @Tags v1/auth
+// @Accept json
+// @Produce json
+// @Param credentials body dto.LoginRequest true "Учетные данные пользователя"
+// @Success 200 {object} dto.LoginResponse "JWT токен"
+// @Failure 400 {object} map[string]interface{} "Неверные данные"
+// @Failure 401 {object} map[string]interface{} "Ошибка авторизации"
+// @Router /v1/auth/jwt/login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
 	var request dto.LoginRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -54,7 +64,16 @@ func (h *AuthHandler) getUserIdFromContext(c *gin.Context) (int32, error) {
 	return int32(userIDInt), nil
 }
 
-// Хендлер для логаута
+// Logout
+// @Summary Выход пользователя
+// @Description Завершение сессии пользователя
+// @Tags v1/auth
+// @Produce json
+// @Success 200 {object} map[string]interface{} "Успешный выход"
+// @Failure 401 {object} map[string]interface{} "Ошибка аутентификации"
+// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
+// @Security BearerAuth
+// @Router /v1/auth/jwt/logout [post]
 func (h *AuthHandler) Logout(c *gin.Context) {
 	userID, err := h.getUserIdFromContext(c) // Предполагаем, что userID хранится в контексте после авторизации
 	if err != nil {

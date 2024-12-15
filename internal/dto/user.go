@@ -2,7 +2,7 @@ package dto
 
 // DTO для создания нового пользователя
 type CreateUserDTO struct {
-	Email    string  `json:"email" binding:"required,email"`
+	Email    string  `json:"email" binding:"required,email" example:"string@gmail.com"`
 	Password string  `json:"password" binding:"required,min=6"`
 	Name     string  `json:"name" binding:"required"`
 	Phone    *string `json:"phone" binding:"required"`

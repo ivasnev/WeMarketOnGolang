@@ -1,6 +1,7 @@
 package routes
 
 import (
+	_ "WeMarketOnGolang/docs" // Путь к пакету docs
 	"WeMarketOnGolang/internal"
 	"WeMarketOnGolang/internal/handlers"
 	"WeMarketOnGolang/internal/middleware"
@@ -10,11 +11,14 @@ import (
 	"WeMarketOnGolang/internal/services/products"
 	"WeMarketOnGolang/internal/services/tasks"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	"github.com/swaggo/gin-swagger"
 	"gorm.io/gorm"
 	"time"
 )
 
 func InitRoutes(router *gin.Engine, db *gorm.DB) {
+	// Инициализация сервисов и хендлеров
 	productService := products.NewProductService(db)
 	productServiceV0 := products.NewInMemoryProductService()
 	productServiceV0.SeedProducts()
@@ -28,12 +32,15 @@ func InitRoutes(router *gin.Engine, db *gorm.DB) {
 	categoryHandler := handlers.NewCategoryHandler(categoryService)
 	inventoryStatusService := inventoryStatus.NewInventoryStatusService(db)
 	inventoryStatusHandler := handlers.NewInventoryStatusHandler(inventoryStatusService)
-	taskService := tasks.NewTaskService(5) // Создаем сервис задач
+	taskService := tasks.NewTaskService(5)
 	taskHandler := handlers.NewTaskHandler(taskService)
 
+	// Настройка маршрута для Swagger
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// Версия API v0
 	apiV0 := router.Group("/v0")
 	{
-		// Группа маршрутов для продуктов
 		products := apiV0.Group("/products")
 		{
 			products.GET("/:id", productHandlerV0.GetProductByID)
@@ -44,12 +51,12 @@ func InitRoutes(router *gin.Engine, db *gorm.DB) {
 		}
 	}
 
+	// Версия API v1
 	apiV1 := router.Group("/v1")
 	{
-		apiV1.Use(middleware.TimeoutMiddleware(5 * time.Second))
-		// Группа маршрутов для продуктов
 		products := apiV1.Group("/products")
 		{
+			products.Use(middleware.TimeoutMiddleware(100 * time.Millisecond))
 			products.Use(middleware.JWTMiddleware())
 			products.GET("/:id", productHandler.GetProductByID)
 			products.GET("/", productHandler.GetAllProducts)
@@ -57,8 +64,10 @@ func InitRoutes(router *gin.Engine, db *gorm.DB) {
 			products.PUT("/:id", productHandler.UpdateProduct)
 			products.DELETE("/:id", productHandler.DeleteProduct)
 		}
+
 		categories := apiV1.Group("/category")
 		{
+			categories.Use(middleware.TimeoutMiddleware(100 * time.Millisecond))
 			categories.Use(middleware.JWTMiddleware())
 			categories.GET("/", categoryHandler.GetAllCategories)
 			categories.POST("/", categoryHandler.CreateCategory)
@@ -66,8 +75,10 @@ func InitRoutes(router *gin.Engine, db *gorm.DB) {
 			categories.PUT("/:id", categoryHandler.UpdateCategory)
 			categories.DELETE("/:id", categoryHandler.DeleteCategory)
 		}
-		inventoryStatuses := apiV1.Group("/inventory-statuses")
+
+		inventoryStatuses := apiV1.Group("/inventory_status")
 		{
+			inventoryStatuses.Use(middleware.TimeoutMiddleware(100 * time.Millisecond))
 			inventoryStatuses.Use(middleware.JWTMiddleware())
 			inventoryStatuses.POST("/", inventoryStatusHandler.CreateInventoryStatus)
 			inventoryStatuses.GET("/:id", inventoryStatusHandler.GetInventoryStatusByID)
@@ -78,28 +89,24 @@ func InitRoutes(router *gin.Engine, db *gorm.DB) {
 
 		authGroup := apiV1.Group("/auth")
 		{
+			authGroup.Use(middleware.TimeoutMiddleware(200 * time.Millisecond))
 			authGroup.POST("/jwt/login", authHandler.Login)
 			authGroup.POST("/jwt/logout", middleware.JWTMiddleware(), authHandler.Logout)
 			authGroup.POST("/register", userHandler.Register)
-			//authGroup.POST("/forgot-password", userHandler.ForgotPassword)
-			//authGroup.POST("/reset-password", userHandler.ResetPassword)
-			//authGroup.POST("/request-verify-token", userHandler.RequestVerifyToken)
-			//authGroup.POST("/verify", userHandler.Verify)
 		}
 
 		usersGroup := apiV1.Group("/users")
 		{
+			usersGroup.Use(middleware.TimeoutMiddleware(100 * time.Millisecond))
 			usersGroup.Use(middleware.JWTMiddleware())
 			usersGroup.GET("/me", userHandler.GetCurrentUser)
 			usersGroup.PATCH("/me", userHandler.UpdateCurrentUser)
 			usersGroup.GET("/:id", userHandler.GetUserByID)
-			//usersGroup.PATCH("/:id", userHandler.UpdateUserByID)
-			//usersGroup.DELETE("/:id", userHandler.DeleteUserByID)
 		}
 
 		tasksGroup := apiV1.Group("/tasks")
 		{
-			// Управление задачами
+			tasksGroup.Use(middleware.TimeoutMiddleware(5 * time.Second))
 			tasksGroup.POST("/inf", taskHandler.CreateTaskInf)
 			tasksGroup.POST("/classic", taskHandler.CreateTaskClassic)
 			tasksGroup.GET("", taskHandler.GetAllTasks)

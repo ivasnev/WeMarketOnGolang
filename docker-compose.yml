@@ -2,6 +2,8 @@ services:
   db:
     image: postgres:15
     container_name: postgres_container
+    networks:
+      - app_network
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -9,4 +11,27 @@ services:
     volumes:
       - ./scripts:/docker-entrypoint-initdb.d
     ports:
-      - "5432:5432"
+      - "5432:5432" # Экспонирует порт для доступа снаружи (необязательно в продакшене)
+
+  app:
+    build: .
+    container_name: wemarket_app
+    volumes:
+      - ./:/app
+    environment:
+      WEMARKET_SERVER_PORT: "8080"
+      WEMARKET_DB_USER: "postgres"
+      WEMARKET_DB_PASSWORD: "postgres"
+      WEMARKET_DB_NAME: "wemarket"
+      WEMARKET_DB_HOST: db
+      WEMARKET_DB_PORT: "5432"
+    networks:
+      - app_network
+    depends_on:
+      - db
+    ports:
+      - "8080:8080" # Прокси-порт приложения
+
+networks:
+  app_network:
+    driver: bridge
