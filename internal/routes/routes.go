@@ -56,7 +56,7 @@ func InitRoutes(router *gin.Engine, db *gorm.DB) {
 	{
 		products := apiV1.Group("/products")
 		{
-			products.Use(middleware.TimeoutMiddleware(100 * time.Millisecond))
+			products.Use(middleware.TimeoutMiddleware(10 * time.Second))
 			products.Use(middleware.JWTMiddleware())
 			products.GET("/:id", productHandler.GetProductByID)
 			products.GET("/", productHandler.GetAllProducts)
@@ -67,7 +67,7 @@ func InitRoutes(router *gin.Engine, db *gorm.DB) {
 
 		categories := apiV1.Group("/category")
 		{
-			categories.Use(middleware.TimeoutMiddleware(100 * time.Millisecond))
+			categories.Use(middleware.TimeoutMiddleware(10 * time.Second))
 			categories.Use(middleware.JWTMiddleware())
 			categories.GET("/", categoryHandler.GetAllCategories)
 			categories.POST("/", categoryHandler.CreateCategory)
@@ -78,7 +78,7 @@ func InitRoutes(router *gin.Engine, db *gorm.DB) {
 
 		inventoryStatuses := apiV1.Group("/inventory_status")
 		{
-			inventoryStatuses.Use(middleware.TimeoutMiddleware(100 * time.Millisecond))
+			inventoryStatuses.Use(middleware.TimeoutMiddleware(10 * time.Second))
 			inventoryStatuses.Use(middleware.JWTMiddleware())
 			inventoryStatuses.POST("/", inventoryStatusHandler.CreateInventoryStatus)
 			inventoryStatuses.GET("/:id", inventoryStatusHandler.GetInventoryStatusByID)
@@ -89,7 +89,7 @@ func InitRoutes(router *gin.Engine, db *gorm.DB) {
 
 		authGroup := apiV1.Group("/auth")
 		{
-			authGroup.Use(middleware.TimeoutMiddleware(200 * time.Millisecond))
+			authGroup.Use(middleware.TimeoutMiddleware(10 * time.Second))
 			authGroup.POST("/jwt/login", authHandler.Login)
 			authGroup.POST("/jwt/logout", middleware.JWTMiddleware(), authHandler.Logout)
 			authGroup.POST("/register", userHandler.Register)
@@ -97,7 +97,7 @@ func InitRoutes(router *gin.Engine, db *gorm.DB) {
 
 		usersGroup := apiV1.Group("/users")
 		{
-			usersGroup.Use(middleware.TimeoutMiddleware(100 * time.Millisecond))
+			usersGroup.Use(middleware.TimeoutMiddleware(10 * time.Second))
 			usersGroup.Use(middleware.JWTMiddleware())
 			usersGroup.GET("/me", userHandler.GetCurrentUser)
 			usersGroup.PATCH("/me", userHandler.UpdateCurrentUser)
@@ -106,7 +106,8 @@ func InitRoutes(router *gin.Engine, db *gorm.DB) {
 
 		tasksGroup := apiV1.Group("/tasks")
 		{
-			tasksGroup.Use(middleware.TimeoutMiddleware(5 * time.Second))
+			tasksGroup.Use(middleware.TimeoutMiddleware(10 * time.Second))
+			tasksGroup.GET("/inf_req", taskHandler.InfReq)
 			tasksGroup.POST("/inf", taskHandler.CreateTaskInf)
 			tasksGroup.POST("/classic", taskHandler.CreateTaskClassic)
 			tasksGroup.GET("", taskHandler.GetAllTasks)

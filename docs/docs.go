@@ -1001,6 +1001,40 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/tasks/inf_req": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "запускает бесконечную операцию",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "v1/tasks"
+                ],
+                "summary": "запускает бесконечную операцию",
+                "responses": {
+                    "201": {
+                        "description": "Созданная задача",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/tasks/{id}": {
             "get": {
                 "security": [

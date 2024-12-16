@@ -925,6 +925,27 @@ paths:
       summary: Создать задачу (бесконечная операция)
       tags:
       - v1/tasks
+  /v1/tasks/inf_req:
+    get:
+      consumes:
+      - application/json
+      description: запускает бесконечную операцию
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Созданная задача
+          schema:
+            type: string
+        "500":
+          description: Ошибка сервера
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: запускает бесконечную операцию
+      tags:
+      - v1/tasks
   /v1/users/{id}:
     get:
       description: Возвращает данные пользователя на основе идентификатора

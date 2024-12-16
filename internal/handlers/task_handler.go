@@ -3,8 +3,10 @@ package handlers
 import (
 	"WeMarketOnGolang/internal/dto"
 	"WeMarketOnGolang/internal/services/tasks"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"time"
 )
 
 type TaskHandler struct {
@@ -33,6 +35,27 @@ func (h *TaskHandler) CreateTaskInf(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, task)
+}
+
+// InfReq запускает бесконечную операцию
+// @Summary запускает бесконечную операцию
+// @Description запускает бесконечную операцию
+// @Tags v1/tasks
+// @Accept json
+// @Produce json
+// @Success 201 {object} string "Созданная задача"
+// @Failure 500 {object} dto.ErrorResponse "Ошибка сервера"
+// @Security BearerAuth
+// @Router /v1/tasks/inf_req [get]
+func (h *TaskHandler) InfReq(c *gin.Context) {
+	for {
+		fmt.Println("INF")
+		time.Sleep(5 * time.Second)
+		select {
+		case <-c.Done():
+			return
+		}
+	}
 }
 
 // CreateTaskClassic создает задачу с классической операцией
