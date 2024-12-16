@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/jackc/pgx/v5/pgconn"
 	"net/http"
+	"os"
 	"regexp"
 )
 
@@ -60,4 +61,12 @@ func HandleDBError(err error) (int, map[string]string) {
 		"error":   "unknown_error",
 		"message": err.Error(),
 	}
+}
+
+func GetDynamicHost() string {
+	// Пример: хост может определяться через переменные окружения или другую логику
+	if envHost := os.Getenv("SWAGGER_HOST"); envHost != "" {
+		return envHost
+	}
+	return "localhost:8080" // значение по умолчанию
 }

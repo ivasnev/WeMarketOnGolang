@@ -1,7 +1,9 @@
 package main
 
 import (
+	"WeMarketOnGolang/docs"
 	"WeMarketOnGolang/internal/routes"
+	"WeMarketOnGolang/internal/utils"
 	"WeMarketOnGolang/pkg"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
@@ -30,6 +32,9 @@ import (
 // @externalDocs.description  OpenAPI
 // @externalDocs.url          https://swagger.io/resources/open-api/
 func main() {
+
+	docs.SwaggerInfo.Host = utils.GetDynamicHost()
+
 	// Инициализация логгера
 	pkg.InitLogger()
 
